@@ -45,5 +45,32 @@ func usage(w *os.File) {
 
 func cmdBootstrap(args []string) error { return fmt.Errorf("not implemented") }
 func cmdRun(args []string) error       { return fmt.Errorf("not implemented") }
-func cmdLs(args []string) error        { return fmt.Errorf("not implemented") }
-func cmdRm(args []string) error        { return fmt.Errorf("not implemented") }
+
+func cmdLs(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("ls takes no arguments")
+	}
+	paths, err := NewPaths()
+	if err != nil {
+		return err
+	}
+	names, err := ListWorkspaces(paths.Workspaces)
+	if err != nil {
+		return err
+	}
+	for _, n := range names {
+		fmt.Println(n)
+	}
+	return nil
+}
+
+func cmdRm(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("rm requires at least one workspace name")
+	}
+	paths, err := NewPaths()
+	if err != nil {
+		return err
+	}
+	return RemoveWorkspaces(paths.Workspaces, args)
+}
