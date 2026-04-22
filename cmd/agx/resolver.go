@@ -45,12 +45,16 @@ func ResolvePrompt(s PromptSources) (string, error) {
 	return "", errors.New("no prompt provided (use positional arg, -f FILE, stdin, or -i)")
 }
 
-func ResolveWorkspaceName(flagName, prompt string, now time.Time) string {
+func ResolveWorkspaceName(flagName, prompt string, now time.Time) (string, error) {
 	if flagName != "" {
-		return flagName
+		s := Slug(flagName)
+		if s == "" {
+			return "", fmt.Errorf("--name %q produces an empty workspace name after sanitization", flagName)
+		}
+		return s, nil
 	}
 	if s := Slug(prompt); s != "" {
-		return s
+		return s, nil
 	}
-	return now.Format("2006-01-02-150405")
+	return now.Format("2006-01-02-150405"), nil
 }

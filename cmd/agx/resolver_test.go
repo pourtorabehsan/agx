@@ -86,13 +86,24 @@ func TestResolveWorkspaceName(t *testing.T) {
 		flag, prompt, want string
 	}{
 		{"my-ws", "anything", "my-ws"},
+		{"My Workspace!", "anything", "my-workspace"}, // flag is slugified
 		{"", "Refactor AUTH!!", "refactor-auth"},
 		{"", "", "2026-04-21-143022"},
 		{"", "!!!", "2026-04-21-143022"}, // slug empties out
 	}
 	for _, c := range cases {
-		if got := ResolveWorkspaceName(c.flag, c.prompt, fixed); got != c.want {
+		got, err := ResolveWorkspaceName(c.flag, c.prompt, fixed)
+		if err != nil {
+			t.Errorf("ResolveWorkspaceName(%q,%q) unexpected error: %v", c.flag, c.prompt, err)
+			continue
+		}
+		if got != c.want {
 			t.Errorf("ResolveWorkspaceName(%q,%q) = %q, want %q", c.flag, c.prompt, got, c.want)
 		}
+	}
+
+	// All-special-char name should error.
+	if _, err := ResolveWorkspaceName("!!!", "anything", fixed); err == nil {
+		t.Error("expected error for unsluggable --name")
 	}
 }

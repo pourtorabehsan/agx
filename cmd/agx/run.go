@@ -59,7 +59,10 @@ func cmdRun(rawArgs []string) error {
 		return fmt.Errorf("%s missing — run 'agx bootstrap' first", paths.HomeDir)
 	}
 
-	wsName := ResolveWorkspaceName(name, prompt, time.Now())
+	wsName, err := ResolveWorkspaceName(name, prompt, time.Now())
+	if err != nil {
+		return err
+	}
 	wsPath, err := EnsureWorkspace(paths.Workspaces, wsName)
 	if err != nil {
 		return err
