@@ -43,8 +43,7 @@ func usage(w *os.File) {
   agx rm NAME [NAME...]`)
 }
 
-func cmdBootstrap(args []string) error { return fmt.Errorf("not implemented") }
-func cmdRun(args []string) error       { return fmt.Errorf("not implemented") }
+func cmdRun(args []string) error { return fmt.Errorf("not implemented") }
 
 func cmdLs(args []string) error {
 	if len(args) > 0 {
