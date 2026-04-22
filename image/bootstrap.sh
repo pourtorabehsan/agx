@@ -9,8 +9,16 @@ chmod 700 "$HOME/.ssh"
 
 # --- 1. SSH key ---
 if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
+  ssh_email=$(git config --global user.email 2>/dev/null || true)
+  if [ -z "$ssh_email" ]; then
+    read -r -p "Your email address (for SSH key): " ssh_email
+    if [ -z "$ssh_email" ]; then
+      echo "agx-bootstrap: email is required for SSH key" >&2
+      exit 1
+    fi
+  fi
   say "Generating SSH key at ~/.ssh/id_ed25519"
-  ssh-keygen -t ed25519 -N '' -C "agx@$(hostname)" -f "$HOME/.ssh/id_ed25519" >/dev/null
+  ssh-keygen -t ed25519 -N '' -C "$ssh_email" -f "$HOME/.ssh/id_ed25519" >/dev/null
   cat >"$HOME/.ssh/config" <<'EOF'
 Host github.com
   IdentityFile ~/.ssh/id_ed25519
