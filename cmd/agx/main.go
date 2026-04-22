@@ -92,7 +92,13 @@ func cmdPrune(args []string) error {
 		fmt.Println("aborted")
 		return nil
 	}
-	return RemoveWorkspaces(paths.Workspaces, names)
+	for _, n := range names {
+		if err := RemoveWorkspaces(paths.Workspaces, []string{n}); err != nil {
+			return err
+		}
+		fmt.Println("Removed", n)
+	}
+	return nil
 }
 
 func cmdRm(args []string) error {
