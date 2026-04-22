@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -21,6 +23,8 @@ func main() {
 		err = cmdLs(rest)
 	case "rm":
 		err = cmdRm(rest)
+	case "prune":
+		err = cmdPrune(rest)
 	case "-h", "--help", "help":
 		usage(os.Stdout)
 		return
@@ -40,7 +44,8 @@ func usage(w *os.File) {
   agx bootstrap
   agx run [-f FILE] [--name NAME] [-i] [PROMPT]
   agx ls
-  agx rm NAME [NAME...]`)
+  agx rm NAME [NAME...]
+  agx prune`)
 }
 
 
@@ -60,6 +65,34 @@ func cmdLs(args []string) error {
 		fmt.Println(n)
 	}
 	return nil
+}
+
+func cmdPrune(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("prune takes no arguments")
+	}
+	paths, err := NewPaths()
+	if err != nil {
+		return err
+	}
+	names, err := ListWorkspaces(paths.Workspaces)
+	if err != nil {
+		return err
+	}
+	if len(names) == 0 {
+		fmt.Println("no workspaces to prune")
+		return nil
+	}
+	for _, n := range names {
+		fmt.Println(" ", n)
+	}
+	fmt.Printf("Remove %d workspace(s)? [y/N] ", len(names))
+	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	if strings.TrimSpace(strings.ToLower(line)) != "y" {
+		fmt.Println("aborted")
+		return nil
+	}
+	return RemoveWorkspaces(paths.Workspaces, names)
 }
 
 func cmdRm(args []string) error {
