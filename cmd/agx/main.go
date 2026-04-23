@@ -5,109 +5,101 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		usage(os.Stderr)
-		os.Exit(2)
+	root := &cobra.Command{
+		Use:           "agx",
+		Short:         "Run sandboxed Claude Code sessions in Docker",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
-	cmd, rest := os.Args[1], os.Args[2:]
-	var err error
-	switch cmd {
-	case "bootstrap":
-		err = cmdBootstrap(rest)
-	case "run":
-		err = cmdRun(rest)
-	case "ls":
-		err = cmdLs(rest)
-	case "rm":
-		err = cmdRm(rest)
-	case "prune":
-		err = cmdPrune(rest)
-	case "-h", "--help", "help":
-		usage(os.Stdout)
-		return
-	default:
-		fmt.Fprintf(os.Stderr, "agx: unknown command %q\n", cmd)
-		usage(os.Stderr)
-		os.Exit(2)
-	}
-	if err != nil {
+	root.AddCommand(
+		newBootstrapCmd(),
+		newRunCmd(),
+		newLsCmd(),
+		newRmCmd(),
+		newPruneCmd(),
+	)
+	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "agx:", err)
 		os.Exit(1)
 	}
 }
 
-func usage(w *os.File) {
-	fmt.Fprintln(w, `usage:
-  agx bootstrap
-  agx run [-f FILE] [--name NAME] [-i] [PROMPT]
-  agx ls
-  agx rm NAME [NAME...]
-  agx prune`)
+func newLsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ls",
+		Short: "List workspaces",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			paths, err := NewPaths()
+			if err != nil {
+				return err
+			}
+			names, err := ListWorkspaces(paths.Workspaces)
+			if err != nil {
+				return err
+			}
+			for _, n := range names {
+				fmt.Println(n)
+			}
+			return nil
+		},
+	}
 }
 
-
-func cmdLs(args []string) error {
-	if len(args) > 0 {
-		return fmt.Errorf("ls takes no arguments")
+func newRmCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "rm NAME [NAME...]",
+		Short: "Remove one or more workspaces",
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			paths, err := NewPaths()
+			if err != nil {
+				return err
+			}
+			return RemoveWorkspaces(paths.Workspaces, args)
+		},
 	}
-	paths, err := NewPaths()
-	if err != nil {
-		return err
-	}
-	names, err := ListWorkspaces(paths.Workspaces)
-	if err != nil {
-		return err
-	}
-	for _, n := range names {
-		fmt.Println(n)
-	}
-	return nil
 }
 
-func cmdPrune(args []string) error {
-	if len(args) > 0 {
-		return fmt.Errorf("prune takes no arguments")
+func newPruneCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "prune",
+		Short: "Remove all workspaces (with confirmation)",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			paths, err := NewPaths()
+			if err != nil {
+				return err
+			}
+			names, err := ListWorkspaces(paths.Workspaces)
+			if err != nil {
+				return err
+			}
+			if len(names) == 0 {
+				fmt.Println("no workspaces to prune")
+				return nil
+			}
+			for _, n := range names {
+				fmt.Println(" ", n)
+			}
+			fmt.Printf("Remove %d workspace(s)? [y/N] ", len(names))
+			line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+			if strings.TrimSpace(strings.ToLower(line)) != "y" {
+				fmt.Println("aborted")
+				return nil
+			}
+			for _, n := range names {
+				if err := RemoveWorkspaces(paths.Workspaces, []string{n}); err != nil {
+					return err
+				}
+				fmt.Println("Removed", n)
+			}
+			return nil
+		},
 	}
-	paths, err := NewPaths()
-	if err != nil {
-		return err
-	}
-	names, err := ListWorkspaces(paths.Workspaces)
-	if err != nil {
-		return err
-	}
-	if len(names) == 0 {
-		fmt.Println("no workspaces to prune")
-		return nil
-	}
-	for _, n := range names {
-		fmt.Println(" ", n)
-	}
-	fmt.Printf("Remove %d workspace(s)? [y/N] ", len(names))
-	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	if strings.TrimSpace(strings.ToLower(line)) != "y" {
-		fmt.Println("aborted")
-		return nil
-	}
-	for _, n := range names {
-		if err := RemoveWorkspaces(paths.Workspaces, []string{n}); err != nil {
-			return err
-		}
-		fmt.Println("Removed", n)
-	}
-	return nil
-}
-
-func cmdRm(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("rm requires at least one workspace name")
-	}
-	paths, err := NewPaths()
-	if err != nil {
-		return err
-	}
-	return RemoveWorkspaces(paths.Workspaces, args)
 }
