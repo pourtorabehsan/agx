@@ -92,7 +92,7 @@ func newRunCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "read prompt from file")
-	cmd.Flags().StringVar(&name, "name", "", "workspace name")
+	cmd.Flags().StringVarP(&name, "name", "n", "", "workspace name")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")
 	return cmd
 }
