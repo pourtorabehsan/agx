@@ -38,6 +38,7 @@ Suggested structure — use what fits, create new categories if none do:
 - `gotchas/` — non-obvious pitfalls, things that burned us before
 - `runbooks/` — step-by-step procedures for recurring operations
 - `repos/` — known repositories, their purpose, default branch, and relationships
+- `architecture/` — system design, service boundaries, data flows, and infrastructure
 
 ## Scope
 
