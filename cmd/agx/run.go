@@ -61,6 +61,7 @@ func newRunCmd() *cobra.Command {
 
 			c := exec.Command("docker", RunArgs(RunConfig{
 				HomeDir:       paths.HomeDir,
+				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
 				Interactive:   interactive,
 			})...)

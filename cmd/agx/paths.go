@@ -9,6 +9,7 @@ type Paths struct {
 	AgxDir     string
 	HomeDir    string
 	Workspaces string
+	KbDir      string
 }
 
 func NewPaths() (Paths, error) {
@@ -21,6 +22,7 @@ func NewPaths() (Paths, error) {
 		AgxDir:     agx,
 		HomeDir:    filepath.Join(agx, "home"),
 		Workspaces: filepath.Join(agx, "workspaces"),
+		KbDir:      filepath.Join(agx, "kb"),
 	}, nil
 }
 

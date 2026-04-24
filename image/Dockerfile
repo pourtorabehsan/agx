@@ -54,10 +54,11 @@ RUN set -eux; \
     rm -rf /home/agx/.local /home/agx/.claude /home/agx/.cache /home/agx/.npm /home/agx/.claude.json; \
     /usr/local/bin/claude --version
 
-# Scripts baked into the image
+# Scripts and Claude commands/skills baked into the image
 COPY entrypoint.sh /usr/local/bin/agx-entrypoint
 COPY bootstrap.sh  /usr/local/bin/agx-bootstrap
 RUN chmod +x /usr/local/bin/agx-entrypoint /usr/local/bin/agx-bootstrap
+COPY plugin/ /usr/local/share/agx/plugin/
 
 USER agx
 WORKDIR /workspace

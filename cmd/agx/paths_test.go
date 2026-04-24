@@ -18,6 +18,7 @@ func TestNewPaths(t *testing.T) {
 		AgxDir:     filepath.Join(home, ".agx"),
 		HomeDir:    filepath.Join(home, ".agx", "home"),
 		Workspaces: filepath.Join(home, ".agx", "workspaces"),
+		KbDir:      filepath.Join(home, ".agx", "kb"),
 	}
 	if p != want {
 		t.Errorf("got %+v, want %+v", p, want)
