@@ -1,5 +1,5 @@
 ---
-description: Gather context for a task from kb, GitHub, Notion, and Slack. Writes /workspace/CONTEXT.md.
+description: Gather context for a task from kb, GitHub, Notion, and Slack. Writes /workspace/CONTEXT.md. Invoke as /agx:capture "<task description>".
 argument-hint: "<task description>"
 ---
 
