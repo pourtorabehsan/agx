@@ -8,7 +8,7 @@ description: Read and write the agx knowledge base at /kb. Invoke whenever
 
 # Knowledge Base
 
-The KB lives at `/kb` (bind-mounted from ~/.agx/kb, shared across all agx containers).
+The KB lives at `/kb`.
 
 ## Read pattern
 
