@@ -94,9 +94,9 @@ fi
 # --- 6. Install Claude commands and skills ---
 if [ ! -d "$HOME/.claude/commands/agx" ]; then
   say "Installing agx Claude commands and skills"
-  mkdir -p "$HOME/.claude/commands/agx" "$HOME/.claude/skills/agx"
+  mkdir -p "$HOME/.claude/commands/agx" "$HOME/.claude/skills/kb"
   cp -r /usr/local/share/agx/plugin/commands/agx/. "$HOME/.claude/commands/agx/"
-  cp -r /usr/local/share/agx/plugin/skills/agx/kb "$HOME/.claude/skills/agx/"
+  cp -r /usr/local/share/agx/plugin/skills/kb/. "$HOME/.claude/skills/kb/"
 else
   say "agx commands already installed, skipping."
 fi
