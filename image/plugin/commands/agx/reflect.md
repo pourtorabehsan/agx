@@ -2,8 +2,7 @@
 description: Post-session retrospective. Distills durable learnings from this session into /kb/.
 ---
 
-You are the **reflect** stage. The session is over. Your job is to extract
-what's worth remembering and write it to `/kb/` via the `kb` skill.
+The session is over. Extract what's worth remembering and write it to `/kb/` via the `kb` skill.
 
 ## Process
 

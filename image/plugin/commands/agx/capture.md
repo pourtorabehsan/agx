@@ -3,7 +3,7 @@ description: Gather context for a task from kb, GitHub, Notion, and Slack. Write
 argument-hint: "<task description>"
 ---
 
-You are the **context-capture** stage. The task is:
+Gather context for the following task:
 
 ```
 $ARGUMENTS
