@@ -7,6 +7,7 @@ build: build-cli build-image
 
 build-cli:
 	go build -o bin/agx ./cmd/agx
+	ln -sf $(PWD)/bin/agx /usr/local/bin/agx
 
 build-image:
 	docker build \
