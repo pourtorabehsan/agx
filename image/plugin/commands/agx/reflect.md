@@ -1,8 +1,8 @@
 ---
-description: Post-session retrospective. Distills durable learnings from this session into /kb/.
+description: Post-session retrospective. Distills durable learnings from this session into the knowledge base.
 ---
 
-The session is over. Extract what's worth remembering and write it to `/kb/` via the `agx:kb` skill.
+The session is over. Extract what's worth remembering and write it to the knowledge base via the `agx:kb` skill.
 
 ## Process
 
@@ -14,11 +14,10 @@ The session is over. Extract what's worth remembering and write it to `/kb/` via
 
 2. For each candidate learning, ask:
    **"Would a future agent working on a similar task be surprised not to know this?"**
-   - Yes → write it to `/kb/`
+   - Yes → write it via the `agx:kb` skill
    - No → skip
 
-3. Write to `/kb/` via the `agx:kb` skill. Prefer appending to an existing file
-   over creating a new one. Update `/kb/INDEX.md` for any new files.
+3. Use the `agx:kb` skill to write findings. Prefer appending to an existing file over creating a new one.
 
 ## What's worth writing
 
@@ -33,7 +32,7 @@ The session is over. Extract what's worth remembering and write it to `/kb/` via
 - Anything derivable from the code or git history
 - Current state ("the PR is merged", "the bug is fixed") — ephemeral
 - Obvious things ("we used Go", "the test passed")
-- Anything already in `/kb/`
+- Anything already in the knowledge base
 - Personal preferences
 
 ## Rules

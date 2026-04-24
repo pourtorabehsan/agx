@@ -18,13 +18,12 @@ be recorded as "consulted: no hits" in the footer — never skipped silently.
 
 ### 1. Knowledge base (`agx:kb` skill)
 
-- Invoke the `agx:kb` skill.
-- `rg` across `/kb/` for prior notes related to this task.
-- Include relevant snippets in CONTEXT.md with file references.
+- Invoke the `agx:kb` skill to find prior context related to this task.
+- Include relevant findings in CONTEXT.md.
 
 ### 2. GitHub (via `gh` CLI)
 
-- Identify candidate repos from the task description and kb references.
+- Identify candidate repos from the task description and kb findings.
 - For each repo, determine the base branch via
   `gh api repos/<owner>/<name> --jq .defaultBranchRef.name` —
   do not hardcode `main`.
@@ -64,7 +63,7 @@ repos:
 
 ## Prior knowledge (from kb)
 
-- <bullet with /kb path + one-line summary>
+- <bullet with source reference + one-line summary>
 
 ## Related issues / PRs
 
