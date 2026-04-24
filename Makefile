@@ -7,7 +7,9 @@ build: build-cli build-image
 
 build-cli:
 	go build -o bin/agx ./cmd/agx
-	ln -sf $(PWD)/bin/agx /usr/local/bin/agx
+	mkdir -p $(HOME)/bin
+	ln -sf $(PWD)/bin/agx $(HOME)/bin/agx
+	@echo "Make sure $(HOME)/bin is in your PATH: export PATH=\"\$$HOME/bin:\$$PATH\""
 
 build-image:
 	docker build \
