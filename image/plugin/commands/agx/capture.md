@@ -16,9 +16,9 @@ Your single deliverable is `/workspace/CONTEXT.md`. Do not write code, clone rep
 Pull from all four sources in parallel. Every source must either produce findings or
 be recorded as "consulted: no hits" in the footer — never skipped silently.
 
-### 1. Knowledge base (`agx:kb` skill)
+### 1. Knowledge base (`kb` skill)
 
-- Invoke the `agx:kb` skill to find prior context related to this task.
+- Invoke the `kb` skill to find prior context related to this task.
 - Include relevant findings in CONTEXT.md.
 
 ### 2. GitHub (via `gh` CLI)

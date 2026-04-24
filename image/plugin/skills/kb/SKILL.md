@@ -1,5 +1,5 @@
 ---
-name: agx:kb
+name: kb
 description: Read and write the agx knowledge base at /kb. Invoke whenever
   task-relevant prior engineering context, architectural decisions, conventions,
   gotchas, or learnings might exist — before planning, during context capture,

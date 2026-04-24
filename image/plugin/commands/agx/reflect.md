@@ -2,7 +2,7 @@
 description: Post-session retrospective. Distills durable learnings from this session into the knowledge base.
 ---
 
-The session is over. Extract what's worth remembering and write it to the knowledge base via the `agx:kb` skill.
+The session is over. Extract what's worth remembering and write it to the knowledge base via the `kb` skill.
 
 ## Process
 
@@ -14,10 +14,10 @@ The session is over. Extract what's worth remembering and write it to the knowle
 
 2. For each candidate learning, ask:
    **"Would a future agent working on a similar task be surprised not to know this?"**
-   - Yes → write it via the `agx:kb` skill
+   - Yes → write it via the `kb` skill
    - No → skip
 
-3. Use the `agx:kb` skill to write findings. Prefer appending to an existing file over creating a new one.
+3. Use the `kb` skill to write findings. Prefer appending to an existing file over creating a new one.
 
 ## What's worth writing
 
