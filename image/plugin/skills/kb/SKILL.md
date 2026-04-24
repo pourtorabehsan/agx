@@ -29,6 +29,15 @@ The KB lives at `/kb`.
 - It is a decision, constraint, or hard-won learning — not current state
 - It is not already captured in `/kb/`
 
+## Categories
+
+Suggested structure — use what fits, create new categories if none do:
+
+- `decisions/` — architectural and technical choices with their reasoning
+- `conventions/` — repo conventions, naming rules, patterns to follow
+- `gotchas/` — non-obvious pitfalls, things that burned us before
+- `runbooks/` — step-by-step procedures for recurring operations
+
 ## Scope
 
 Engineering context only: architecture decisions, repo conventions, gotchas,

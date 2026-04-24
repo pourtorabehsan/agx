@@ -11,7 +11,14 @@ import (
 const kbIndexSeed = `# Knowledge Base Index
 
 Entries are added automatically during sessions. Format:
-- [title](file.md) — one-line description of what's in the file
+- [title](path/file.md) — one-line description of what's in the file
+
+## Categories
+
+- decisions/ — architectural and technical choices with their reasoning
+- conventions/ — repo conventions, naming rules, patterns to follow
+- gotchas/ — non-obvious pitfalls, things that burned us before
+- runbooks/ — step-by-step procedures for recurring operations
 `
 
 func newBootstrapCmd() *cobra.Command {
