@@ -34,5 +34,4 @@ The KB lives at `/kb`.
 Engineering context only: architecture decisions, repo conventions, gotchas,
 runbooks, domain rules, learnings from past tasks.
 
-Not: personal preferences (those live in auto-memory), credentials,
-anything that belongs in git.
+Not: personal preferences, credentials, anything that belongs in git.

@@ -35,7 +35,7 @@ what's worth remembering and write it to `/kb/` via the `kb` skill.
 - Current state ("the PR is merged", "the bug is fixed") — ephemeral
 - Obvious things ("we used Go", "the test passed")
 - Anything already in `/kb/`
-- Personal preferences — those belong in auto-memory, not the KB
+- Personal preferences
 
 ## Rules
 
