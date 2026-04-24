@@ -2,7 +2,7 @@
 description: Post-session retrospective. Distills durable learnings from this session into /kb/.
 ---
 
-The session is over. Extract what's worth remembering and write it to `/kb/` via the `kb` skill.
+The session is over. Extract what's worth remembering and write it to `/kb/` via the `agx:kb` skill.
 
 ## Process
 
@@ -17,7 +17,7 @@ The session is over. Extract what's worth remembering and write it to `/kb/` via
    - Yes → write it to `/kb/`
    - No → skip
 
-3. Write to `/kb/` via the `kb` skill. Prefer appending to an existing file
+3. Write to `/kb/` via the `agx:kb` skill. Prefer appending to an existing file
    over creating a new one. Update `/kb/INDEX.md` for any new files.
 
 ## What's worth writing

@@ -16,9 +16,9 @@ Your single deliverable is `/workspace/CONTEXT.md`. Do not write code, clone rep
 Pull from all four sources in parallel. Every source must either produce findings or
 be recorded as "consulted: no hits" in the footer — never skipped silently.
 
-### 1. Knowledge base (`kb` skill)
+### 1. Knowledge base (`agx:kb` skill)
 
-- Invoke the `kb` skill.
+- Invoke the `agx:kb` skill.
 - `rg` across `/kb/` for prior notes related to this task.
 - Include relevant snippets in CONTEXT.md with file references.
 
