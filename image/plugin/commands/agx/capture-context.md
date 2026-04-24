@@ -13,7 +13,7 @@ Your single deliverable is `/workspace/CONTEXT.md`. Do not write code, clone rep
 
 ## Process
 
-Pull from four sources in order. Every source must either produce findings or
+Pull from all four sources in parallel. Every source must either produce findings or
 be recorded as "consulted: no hits" in the footer — never skipped silently.
 
 ### 1. Knowledge base (`kb` skill)
