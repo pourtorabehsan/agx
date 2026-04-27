@@ -10,15 +10,30 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Base tools the agent will reach for: ssh, git, jq, rg, basic shell
 # utilities, sudo for any apt-get the agent decides it needs.
+# build-essential + pkg-config are baked in because npm/pip/etc. native
+# extensions fail loudly without them and agents hit this constantly.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl gnupg git openssh-client \
-      jq ripgrep less locales sudo tzdata \
+      jq ripgrep build-essential pkg-config \
+      less locales sudo tzdata \
     && rm -rf /var/lib/apt/lists/*
+
+# BuildKit-provided arch (amd64 / arm64). Required by the Go install below.
+ARG TARGETARCH
+RUN test -n "${TARGETARCH}" || (echo "TARGETARCH unset — build with BuildKit" >&2 && exit 1)
 
 # Node.js 22 — several Claude Code subsystems expect a working node.
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
  && rm -rf /var/lib/apt/lists/*
+
+# Go toolchain. Pinned to match this repo's go.mod; bump together.
+ARG GO_VERSION=1.25.0
+RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz" \
+      -o /tmp/go.tgz \
+ && tar -C /usr/local -xzf /tmp/go.tgz \
+ && rm /tmp/go.tgz
+ENV GOPATH="/home/agx/go"
 
 # GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
@@ -38,13 +53,20 @@ RUN (userdel -r ubuntu 2>/dev/null || true) \
  && echo 'agx ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/agx \
  && chmod 0440 /etc/sudoers.d/agx
 
-ENV HOME=/home/agx
+ENV HOME=/home/agx \
+    PATH="/usr/local/go/bin:/home/agx/go/bin:${PATH}"
 
 # Install Claude Code as the agx user, then relocate to /usr/local so the
 # binary survives the runtime bind-mount over /home/agx.
+#
+# CLAUDE_CACHE_BUST forces a fresh upstream pull without invalidating the
+# earlier layers. Pass `--build-arg CLAUDE_CACHE_BUST=$(date +%s)` to
+# rebuild this layer (and the relocate layer below).
+ARG CLAUDE_CACHE_BUST=0
 USER agx
 WORKDIR /home/agx
-RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN echo "claude cache bust: ${CLAUDE_CACHE_BUST}" \
+ && curl -fsSL https://claude.ai/install.sh | bash
 USER root
 RUN set -eux; \
     mkdir -p /usr/local/share/claude; \
