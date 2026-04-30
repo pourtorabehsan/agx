@@ -23,6 +23,9 @@ case "$mode" in
       exec claude --dangerously-skip-permissions
     fi
     ;;
+  resume)
+    exec claude --dangerously-skip-permissions
+    ;;
   *)
     echo "agx-entrypoint: unknown AGX_MODE=$mode" >&2
     exit 2

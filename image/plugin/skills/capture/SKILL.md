@@ -1,6 +1,6 @@
 ---
 name: capture
-description: Gather context for the current task from kb, GitHub, Notion, and Slack. Invoke before planning or implementing any non-trivial task. Produces /workspace/CONTEXT.md.
+description: Gather context for the current task from kb, GitHub, Notion, and Slack. Invoke before planning or implementing any non-trivial task or when user asks to capture context about a specific topic. Produces /workspace/CONTEXT.md.
 ---
 
 Gather context for the current task.

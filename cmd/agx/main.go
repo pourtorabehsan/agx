@@ -19,6 +19,7 @@ func main() {
 	root.AddCommand(
 		newBootstrapCmd(),
 		newRunCmd(),
+		newResumeCmd(),
 		newLsCmd(),
 		newRmCmd(),
 		newPruneCmd(),

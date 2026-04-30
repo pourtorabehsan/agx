@@ -5,6 +5,7 @@ type RunConfig struct {
 	KbDir         string
 	WorkspacePath string
 	Interactive   bool
+	Resume        bool
 }
 
 func BootstrapArgs(homeDir, kbDir string) []string {
@@ -20,7 +21,11 @@ func BootstrapArgs(homeDir, kbDir string) []string {
 func RunArgs(c RunConfig) []string {
 	mode := "headless"
 	args := []string{"run", "--rm", "--init"}
-	if c.Interactive {
+	switch {
+	case c.Resume:
+		args = append(args, "-it")
+		mode = "resume"
+	case c.Interactive:
 		args = append(args, "-it")
 		mode = "interactive"
 	}
