@@ -44,6 +44,7 @@ agx run "explain the auth flow in this repo"        # headless, prompt as positi
 agx run -f prompt.md                                # prompt from a file
 echo "summarise yesterday's PRs" | agx run          # prompt from stdin
 agx run -i                                          # interactive TTY session
+agx run -d "summarise yesterday's PRs"               # detached (background); logs to session.log
 agx run -n my-task "..."                            # explicit workspace name
 agx run -r owner/repo "fix the flaky test"          # target a specific repository
 
@@ -53,7 +54,7 @@ agx prune                                           # remove all (with confirmat
 agx resume <name>                                   # resume an existing workspace interactively
 ```
 
-Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file.
+Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file. Detached runs (`-d` / `--detach`) run the container in the background, printing the workspace name and log path to stderr on start, and are mutually exclusive with `--interactive`.
 
 Every non-empty headless or interactive prompt automatically prepends `invoke conduct skill`, so the `conduct` skill is the default entry point for all task-oriented runs. Pass `-i` without a prompt to drop into a plain Claude session without automatic conduct invocation.
 
