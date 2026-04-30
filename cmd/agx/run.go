@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +15,7 @@ import (
 
 func newRunCmd() *cobra.Command {
 	var file, name, repo string
-	var interactive bool
+	var interactive, detach bool
 
 	cmd := &cobra.Command{
 		Use:   "run [PROMPT]",
@@ -24,6 +25,10 @@ func newRunCmd() *cobra.Command {
 			var arg string
 			if len(args) == 1 {
 				arg = args[0]
+			}
+
+			if detach && interactive {
+				return errors.New("--detach and --interactive are mutually exclusive")
 			}
 
 			stdinIsTTY := term.IsTerminal(int(os.Stdin.Fd()))
@@ -71,23 +76,35 @@ func newRunCmd() *cobra.Command {
 				WorkspacePath: wsPath,
 				Interactive:   interactive,
 			})...)
-			c.Stdin = os.Stdin
 
+			logPath := filepath.Join(wsPath, ".agx", "session.log")
+			logFile, err := os.Create(logPath)
+			if err != nil {
+				return err
+			}
+			defer logFile.Close()
+
+			fmt.Fprintln(os.Stderr, "==> workspace:", wsPath)
+
+			if detach {
+				c.Stdout = logFile
+				c.Stderr = logFile
+				if err := c.Start(); err != nil {
+					return err
+				}
+				fmt.Fprintf(os.Stderr, "==> detached: %s\n==> logs: %s\n", "agx-"+wsName, logPath)
+				return nil
+			}
+
+			c.Stdin = os.Stdin
 			if interactive {
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 			} else {
-				logPath := filepath.Join(wsPath, ".agx", "session.log")
-				logFile, err := os.Create(logPath)
-				if err != nil {
-					return err
-				}
-				defer logFile.Close()
 				c.Stdout = io.MultiWriter(os.Stdout, logFile)
 				c.Stderr = io.MultiWriter(os.Stderr, logFile)
 			}
 
-			fmt.Fprintln(os.Stderr, "==> workspace:", wsPath)
 			if err := c.Run(); err != nil {
 				if exitErr, ok := err.(*exec.ExitError); ok {
 					os.Exit(exitErr.ExitCode())
@@ -102,5 +119,6 @@ func newRunCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&name, "name", "n", "", "workspace name")
 	cmd.Flags().StringVarP(&repo, "repo", "r", "", "target repository (owner/name), appended to prompt")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")
+	cmd.Flags().BoolVarP(&detach, "detach", "d", false, "run in background; logs go to workspace session.log")
 	return cmd
 }
