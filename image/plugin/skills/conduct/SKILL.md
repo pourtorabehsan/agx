@@ -63,7 +63,7 @@ Choose phases from the vocabulary below. You decide which to include and in what
 | `review-spec` | Spec reviewer — does the output match the definition of done? |
 | `review-coverage` | Test coverage reviewer — are the right things tested? |
 | `fix` | Engineer addressing specific review feedback, nothing else |
-| `push` | Engineer committing, pushing branch, opening PR with a clear description |
+| `push` | Engineer committing on a feature branch (never main), pushing, and opening a PR with a clear description |
 
 The vocabulary above is a starting point, not an exhaustive list. If the task calls for something not covered — a migration dry-run, a changelog generation, a compatibility check, a rollback plan — invent the phase, give it a clear name and persona, and add it where it fits.
 
