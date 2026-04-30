@@ -1,5 +1,7 @@
 package main
 
+import "path/filepath"
+
 type RunConfig struct {
 	HomeDir       string
 	KbDir         string
@@ -20,7 +22,7 @@ func BootstrapArgs(homeDir, kbDir string) []string {
 
 func RunArgs(c RunConfig) []string {
 	mode := "headless"
-	args := []string{"run", "--rm", "--init"}
+	args := []string{"run", "--rm", "--init", "--name", "agx-" + filepath.Base(c.WorkspacePath)}
 	switch {
 	case c.Resume:
 		args = append(args, "-it")

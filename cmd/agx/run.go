@@ -37,13 +37,6 @@ func newRunCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if prompt != "" {
-				prompt = "invoke conduct skill\n" + prompt
-			}
-			if repo != "" {
-				prompt = prompt + "\nTarget repo: " + repo
-			}
-
 			paths, err := NewPaths()
 			if err != nil {
 				return err
@@ -55,6 +48,13 @@ func newRunCmd() *cobra.Command {
 			wsName, err := ResolveWorkspaceName(name, prompt, time.Now())
 			if err != nil {
 				return err
+			}
+
+			if prompt != "" {
+				prompt = "invoke conduct skill\n" + prompt
+			}
+			if repo != "" {
+				prompt = prompt + "\nTarget repo: " + repo
 			}
 			wsPath, err := EnsureWorkspace(paths.Workspaces, wsName)
 			if err != nil {
