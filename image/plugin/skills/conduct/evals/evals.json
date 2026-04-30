@@ -1,0 +1,59 @@
+{
+  "skill_name": "conduct",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "fix the login timeout bug — users get logged out after 5 minutes even when they're active. Target repo: github.com/acme/api",
+      "expected_output": "Conductor classifies as small, skips capture, spawns implement → push sub-sessions, writes conduct.md journal, produces a PR.",
+      "assertions": [
+        "Classifies task as small",
+        "Skips capture skill invocation",
+        "Spawns at most 2-3 sub-sessions (implement + push + optional fix)",
+        "Writes /workspace/.agx/conduct.md with classification and journal entries",
+        "Each sub-session brief includes the output contract header requirement",
+        "Does not write code or edit files directly"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "add per-user and per-endpoint rate limiting to the API gateway. it should be configurable via env vars and degrade gracefully when redis is unavailable",
+      "expected_output": "Conductor classifies as medium, invokes capture, builds a plan → implement → review-spec → push phase list, routes based on output headers.",
+      "assertions": [
+        "Classifies task as medium or large",
+        "Invokes capture skill",
+        "Includes a plan phase before implement",
+        "Includes at least one review phase",
+        "Review brief does not include the implementation prompt (blind review)",
+        "Routes correctly based on output contract headers",
+        "Stays within turn budget",
+        "Does not write code or edit files directly"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "migrate the user-service from REST to GraphQL. the frontend (github.com/acme/web) consumes the API and needs to be updated too. we need to keep the REST endpoints alive for 30 days for third-party clients",
+      "expected_output": "Conductor classifies as large, invokes capture, builds a multi-phase plan including pre-mortem and multiple reviews, manages turn budget across repos.",
+      "assertions": [
+        "Classifies task as large",
+        "Invokes capture skill",
+        "Includes pre-mortem phase",
+        "Includes plan + review-plan before implement",
+        "Identifies both repos in the phase briefs",
+        "Uses more capable model for reasoning phases (noted in briefs or model flag)",
+        "Tracks turn count in conduct.md",
+        "Does not exceed 24 turns",
+        "Does not write code or edit files directly"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "what does the auth middleware do?",
+      "expected_output": "Conductor recognises this is not actionable engineering work and answers directly without invoking the full conduct orchestration workflow.",
+      "assertions": [
+        "Does not spawn sub-sessions for a simple question",
+        "Does not create /workspace/.agx/conduct.md for a non-task prompt",
+        "Answers the question directly or invokes capture at most"
+      ]
+    }
+  ]
+}
