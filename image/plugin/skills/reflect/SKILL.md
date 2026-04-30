@@ -1,5 +1,6 @@
 ---
-description: Post-session retrospective. Distills durable learnings from this session into the knowledge base.
+name: reflect
+description: Post-session retrospective. Invoke at the end of a session to distill durable learnings into the knowledge base.
 ---
 
 The session is over. Extract what's worth remembering and write it to the knowledge base via the `kb` skill.
@@ -9,7 +10,7 @@ The session is over. Extract what's worth remembering and write it to the knowle
 1. Read what the session produced:
    - `/workspace/CONTEXT.md` — what we knew going in
    - `/workspace/PLAN.md` — what we planned (if it exists)
-   - `git diff HEAD~1` or `git log --oneline -10` — what actually changed
+   - `git diff main` — what actually changed
    - Any errors, surprises, or pivots that came up during the session
 
 2. For each candidate learning, ask:

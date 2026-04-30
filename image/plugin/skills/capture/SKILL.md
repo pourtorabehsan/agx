@@ -1,13 +1,9 @@
 ---
-description: Gather context for a task from kb, GitHub, Notion, and Slack. Writes /workspace/CONTEXT.md. Invoke as /agx:capture "<task description>".
-argument-hint: "<task description>"
+name: capture
+description: Gather context for the current task from kb, GitHub, Notion, and Slack. Invoke before planning or implementing any non-trivial task. Produces /workspace/CONTEXT.md.
 ---
 
-Gather context for the following task:
-
-```
-$ARGUMENTS
-```
+Gather context for the current task.
 
 Your single deliverable is `/workspace/CONTEXT.md`. Do not write code, clone repos, or write a plan.
 

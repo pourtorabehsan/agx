@@ -91,14 +91,14 @@ else
   say "AGX_BRANCH_PREFIX already set, skipping."
 fi
 
-# --- 6. Install Claude commands and skills ---
-if [ ! -d "$HOME/.claude/commands/agx" ]; then
-  say "Installing agx Claude commands and skills"
-  mkdir -p "$HOME/.claude/commands/agx" "$HOME/.claude/skills/kb"
-  cp -r /usr/local/share/agx/plugin/commands/agx/. "$HOME/.claude/commands/agx/"
-  cp -r /usr/local/share/agx/plugin/skills/kb/. "$HOME/.claude/skills/kb/"
+# --- 6. Install Claude skills and session defaults ---
+if [ ! -d "$HOME/.claude/skills/conduct" ]; then
+  say "Installing agx Claude skills"
+  mkdir -p "$HOME/.claude/skills"
+  cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
+  cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
 else
-  say "agx commands already installed, skipping."
+  say "agx skills already installed, skipping."
 fi
 
 say "Bootstrap complete."

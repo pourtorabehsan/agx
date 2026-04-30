@@ -13,7 +13,7 @@ import (
 )
 
 func newRunCmd() *cobra.Command {
-	var file, name string
+	var file, name, repo string
 	var interactive bool
 
 	cmd := &cobra.Command{
@@ -36,6 +36,12 @@ func newRunCmd() *cobra.Command {
 			})
 			if err != nil {
 				return err
+			}
+			if prompt != "" {
+				prompt = "invoke conduct skill\n" + prompt
+			}
+			if repo != "" {
+				prompt = prompt + "\nTarget repo: " + repo
 			}
 
 			paths, err := NewPaths()
@@ -94,6 +100,7 @@ func newRunCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "read prompt from file")
 	cmd.Flags().StringVarP(&name, "name", "n", "", "workspace name")
+	cmd.Flags().StringVarP(&repo, "repo", "r", "", "target repository (owner/name), appended to prompt")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")
 	return cmd
 }
