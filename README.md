@@ -33,9 +33,9 @@ Interactively walks through:
 3. `claude /login`.
 4. Set `git` user.name / user.email.
 5. Pick a branch prefix for agent commits (stored in `~/.agx/home/.agxrc` as `AGX_BRANCH_PREFIX`).
-6. Install the bundled Claude commands (`/agx:capture`, `/agx:reflect`) and the `kb` skill into `~/.agx/home/.claude/`.
+6. Install the bundled Claude skills (capture, conduct, kb, reflect) and `CLAUDE.md` into `~/.agx/home/.claude/`.
 
-Each step is idempotent — re-running `bootstrap` skips anything already configured.
+Steps 1–5 are idempotent — re-running `bootstrap` skips anything already configured. Step 6 always reinstalls the skills, so re-running `bootstrap` after a `make build` picks up any skill changes.
 
 ## Usage
 
@@ -45,6 +45,7 @@ agx run -f prompt.md                                # prompt from a file
 echo "summarise yesterday's PRs" | agx run          # prompt from stdin
 agx run -i                                          # interactive TTY session
 agx run -n my-task "..."                            # explicit workspace name
+agx run -r owner/repo "fix the flaky test"          # target a specific repository
 
 agx ls                                              # list workspaces
 agx rm <name> [<name>...]                           # remove workspaces
@@ -53,6 +54,10 @@ agx resume <name>                                   # resume an existing workspa
 ```
 
 Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file.
+
+Every non-empty headless or interactive prompt automatically prepends `invoke conduct skill`, so the `conduct` skill is the default entry point for all task-oriented runs. Pass `-i` without a prompt to drop into a plain Claude session without automatic conduct invocation.
+
+The `--repo` / `-r` flag appends `Target repo: owner/repo` to the prompt. The `conduct` skill uses this to identify which repository to clone during the `clone` phase.
 
 If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, non-alphanumeric → `-`, trimmed to 40 chars on a word boundary). If the prompt is empty, the name falls back to a `YYYY-MM-DD-HHMMSS` timestamp.
 
@@ -63,7 +68,7 @@ If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, 
 ├── home/         → bind-mounted as /home/agx in the container
 │   ├── .ssh/         SSH keys
 │   ├── .config/gh/   gh auth
-│   ├── .claude/      Claude credentials, commands, skills
+│   ├── .claude/      Claude credentials, skills, CLAUDE.md
 │   ├── .gitconfig
 │   └── .agxrc        AGX_BRANCH_PREFIX, etc.
 ├── workspaces/   → one subdir per session, bind-mounted as /workspace
@@ -79,24 +84,25 @@ The container runs as a non-root user whose UID/GID match the host invoker, so f
 
 ## The plugin
 
-The image bakes in two slash commands and two skills, installed into `~/.agx/home/.claude/` on first `bootstrap`:
+The image bakes in four skills, installed into `~/.agx/home/.claude/` on every `bootstrap`:
 
-- **`/agx:capture <task>`** — gathers context from the kb, GitHub, Notion, and Slack into `/workspace/CONTEXT.md`. No code, no plan — just grounded context.
-- **`/agx:reflect`** — post-session retrospective. Writes durable learnings to `/kb` via the `kb` skill.
-- **`kb` skill** — read/write convention for the shared knowledge base at `/kb`. Reads `INDEX.md` first, greps for prior context, and appends new entries with a one-line index hook.
-- **`conduct` skill** — autonomous engineering conductor. Given a task involving code changes, classifies complexity, builds a phase plan, and delegates implementation to focused sub-sessions via `claude -p`.
+- **`capture`** — gathers context from the kb, GitHub, Notion, and Slack into `/workspace/CONTEXT.md`. No code, no plan — just grounded context.
+- **`reflect`** — post-session retrospective. Writes durable learnings to `/kb` via the `kb` skill.
+- **`kb`** — read/write convention for the shared knowledge base at `/kb`. Reads `INDEX.md` first, greps for prior context, and appends new entries with a one-line index hook.
+- **`conduct`** — autonomous engineering conductor. Given a task involving code changes, classifies complexity, builds a phase plan, and delegates implementation to focused sub-sessions via `claude -p`.
 
 Source lives under `image/plugin/`; edits there require an image rebuild (`make build-image`) and a re-run of `agx bootstrap` to copy them into the host home.
 
 ## Layout
 
 ```
-cmd/agx/         Go CLI (cobra) — bootstrap, run, ls, rm, prune
+cmd/agx/         Go CLI (cobra) — bootstrap, run, resume, ls, rm, prune
 image/           Docker image
   Dockerfile     ubuntu:24.04 + node + gh + claude
-  entrypoint.sh  picks headless vs interactive based on AGX_MODE
+  entrypoint.sh  picks headless vs interactive vs resume based on AGX_MODE
   bootstrap.sh   the first-run wizard above
-  plugin/        Claude commands and skills baked in
+  plugin/        Claude skills baked in
+    CLAUDE.md    agent rules (never push to main, use AGX_BRANCH_PREFIX)
     skills/
       capture/   SKILL.md
       conduct/   SKILL.md
