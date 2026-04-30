@@ -53,6 +53,7 @@ Choose phases from the vocabulary below. You decide which to include and in what
 
 | Phase | Persona for sub-session |
 |---|---|
+| `clone` | Setup engineer — clone repos, verify access, write the repo manifest |
 | `pre-mortem` | Adversarial risk analyst — find what's most likely to fail |
 | `plan` | Senior engineer designing the minimal correct approach |
 | `review-plan` | Independent critic — no knowledge of who wrote the plan |
@@ -70,9 +71,11 @@ Choose the model for each sub-session based on cognitive demand. Phases that req
 
 ### Starting points
 
-- **Small:** `implement` → `push`
-- **Medium:** `plan` → `test-spec` → `implement` → `review-spec` → `push`
-- **Large:** `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-security` → `review-spec` → `push`
+`clone` always runs first, before any phase that touches code. It gets its repo list from CONTEXT.md frontmatter if capture ran, otherwise from the task prompt (look for a `Target repo:` line or any repo mentioned in the task description). It clones each repo to `/workspace/repos/<owner>/<name>/` and writes a manifest to `/workspace/.agx/repos.md`. Every subsequent brief must include the relevant path from that manifest — this is how sub-sessions find code without re-cloning.
+
+- **Small:** `clone` → `implement` → `push`
+- **Medium:** `clone` → `plan` → `test-spec` → `implement` → `review-spec` → `push`
+- **Large:** `clone` → `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-security` → `review-spec` → `push`
 
 You may skip review phases if the turn budget is tight and confidence is high. Never skip `push` if implementation is complete — shipping is the point.
 
