@@ -92,13 +92,13 @@ else
 fi
 
 # --- 6. Install Claude skills and session defaults ---
-if [ ! -d "$HOME/.claude/skills/conduct" ]; then
-  say "Installing agx Claude skills"
-  mkdir -p "$HOME/.claude/skills"
-  cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
-  cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
+if [ -d "$HOME/.claude/skills/conduct" ]; then
+  say "Reinstalling agx Claude skills (overwriting existing)"
 else
-  say "agx skills already installed, skipping."
+  say "Installing agx Claude skills"
 fi
+mkdir -p "$HOME/.claude/skills"
+cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
+cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
 
 say "Bootstrap complete."
