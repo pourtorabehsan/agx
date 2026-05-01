@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -20,10 +22,15 @@ func main() {
 		newBootstrapCmd(),
 		newRunCmd(),
 		newResumeCmd(),
+		newAttachCmd(),
 		newLogsCmd(),
-		newLsCmd(),
+		newPsCmd(),
+		newKillCmd(),
+		newWaitCmd(),
+		newPhasesCmd(),
 		newRmCmd(),
 		newPruneCmd(),
+		newUpgradeCmd(),
 	)
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "agx:", err)
@@ -31,22 +38,33 @@ func main() {
 	}
 }
 
-func newLsCmd() *cobra.Command {
+func newPhasesCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "ls",
-		Short: "List workspaces",
-		Args:  cobra.NoArgs,
+		Use:   "phases NAME",
+		Short: "List available phase outputs for a workspace",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			paths, err := NewPaths()
 			if err != nil {
 				return err
 			}
-			names, err := ListWorkspaces(paths.Workspaces)
+			wsPath := paths.Workspace(args[0])
+			if _, err := os.Stat(wsPath); os.IsNotExist(err) {
+				return fmt.Errorf("workspace %q not found — run 'agx ps -a' to list workspaces", args[0])
+			}
+			phasesDir := filepath.Join(wsPath, ".agx", "phases")
+			entries, err := os.ReadDir(phasesDir)
 			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					fmt.Println("no phases yet")
+					return nil
+				}
 				return err
 			}
-			for _, n := range names {
-				fmt.Println(n)
+			for _, e := range entries {
+				if phase, ok := strings.CutSuffix(e.Name(), "-output.md"); ok {
+					fmt.Println(phase)
+				}
 			}
 			return nil
 		},

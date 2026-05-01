@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -14,8 +15,9 @@ import (
 )
 
 func newRunCmd() *cobra.Command {
-	var file, name, repo string
-	var interactive, detach bool
+	var file, name, model, memory, cpus string
+	var repos []string
+	var interactive, detach, noConductConduct bool
 
 	cmd := &cobra.Command{
 		Use:   "run [PROMPT]",
@@ -54,17 +56,27 @@ func newRunCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			if prompt != "" {
-				prompt = "invoke conduct skill\n" + prompt
-			}
-			if repo != "" {
-				prompt = prompt + "\nTarget repo: " + repo
-			}
 			wsPath, err := EnsureWorkspace(paths.Workspaces, wsName)
 			if err != nil {
 				return err
 			}
+
+			if err := WriteMeta(wsPath, Meta{
+				Prompt:  firstLine(prompt, 80),
+				Repos:   repos,
+				Started: time.Now().UTC().Format(time.RFC3339),
+				Model:   model,
+			}); err != nil {
+				return err
+			}
+
+			if prompt != "" && !noConductConduct {
+				prompt = "invoke conduct skill\n" + prompt
+			}
+			for _, r := range repos {
+				prompt += "\nTarget repo: " + r
+			}
+
 			promptPath := filepath.Join(wsPath, ".agx", "prompt.txt")
 			if err := os.WriteFile(promptPath, []byte(prompt), 0o644); err != nil {
 				return err
@@ -75,6 +87,9 @@ func newRunCmd() *cobra.Command {
 				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
 				Interactive:   interactive,
+				Model:         model,
+				Memory:        memory,
+				CPUs:          cpus,
 			})...)
 
 			logPath := filepath.Join(wsPath, ".agx", "session.log")
@@ -117,8 +132,21 @@ func newRunCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "read prompt from file")
 	cmd.Flags().StringVarP(&name, "name", "n", "", "workspace name")
-	cmd.Flags().StringVarP(&repo, "repo", "r", "", "target repository (owner/name), appended to prompt")
+	cmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "target repository (owner/name); repeatable")
+	cmd.Flags().StringVar(&model, "model", "", "model override (e.g. claude-opus-4-7)")
+	cmd.Flags().StringVar(&memory, "memory", "", "container memory limit (e.g. 8g)")
+	cmd.Flags().StringVar(&cpus, "cpus", "", "container CPU limit (e.g. 4)")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")
 	cmd.Flags().BoolVarP(&detach, "detach", "d", false, "run in background; logs go to workspace session.log")
+	cmd.Flags().BoolVar(&noConductConduct, "no-conduct", false, "skip the 'invoke conduct skill' prefix (use for simple/exploratory prompts)")
 	return cmd
+}
+
+func firstLine(s string, max int) string {
+	line := strings.SplitN(s, "\n", 2)[0]
+	line = strings.TrimSpace(line)
+	if len(line) > max {
+		line = line[:max]
+	}
+	return line
 }

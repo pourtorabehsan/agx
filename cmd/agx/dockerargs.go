@@ -8,6 +8,9 @@ type RunConfig struct {
 	WorkspacePath string
 	Interactive   bool
 	Resume        bool
+	Model         string
+	Memory        string
+	CPUs          string
 }
 
 func BootstrapArgs(homeDir, kbDir string) []string {
@@ -31,13 +34,22 @@ func RunArgs(c RunConfig) []string {
 		args = append(args, "-it")
 		mode = "interactive"
 	}
+	if c.Memory != "" {
+		args = append(args, "--memory", c.Memory)
+	}
+	if c.CPUs != "" {
+		args = append(args, "--cpus", c.CPUs)
+	}
 	args = append(args,
 		"-v", c.HomeDir+":/home/agx",
 		"-v", c.KbDir+":/kb",
 		"-v", c.WorkspacePath+":/workspace",
 		"-e", "AGX_MODE="+mode,
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
-		"agx:latest",
 	)
+	if c.Model != "" {
+		args = append(args, "-e", "AGX_MODEL="+c.Model)
+	}
+	args = append(args, "agx:latest")
 	return args
 }

@@ -12,22 +12,28 @@ cd /workspace
 mode="${AGX_MODE:-headless}"
 prompt_file="${AGX_PROMPT_FILE:-/workspace/.agx/prompt.txt}"
 
+# Build optional --model flag if AGX_MODEL is set.
+model_args=()
+if [ -n "${AGX_MODEL:-}" ]; then
+  model_args=(--model "$AGX_MODEL")
+fi
+
 case "$mode" in
   headless)
-    claude -p "$(cat "$prompt_file")" --dangerously-skip-permissions
+    claude -p "$(cat "$prompt_file")" "${model_args[@]}" --dangerously-skip-permissions
     rc=$?
     echo "==> session exited: code=${rc} mode=${mode}"
     exit "$rc"
     ;;
   interactive)
     if [ -s "$prompt_file" ]; then
-      exec claude --dangerously-skip-permissions "$(cat "$prompt_file")"
+      exec claude --dangerously-skip-permissions "${model_args[@]}" "$(cat "$prompt_file")"
     else
-      exec claude --dangerously-skip-permissions
+      exec claude --dangerously-skip-permissions "${model_args[@]}"
     fi
     ;;
   resume)
-    exec claude --dangerously-skip-permissions
+    exec claude --dangerously-skip-permissions "${model_args[@]}"
     ;;
   *)
     echo "agx-entrypoint: unknown AGX_MODE=$mode" >&2
