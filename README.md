@@ -44,21 +44,38 @@ agx run "explain the auth flow in this repo"        # headless, prompt as positi
 agx run -f prompt.md                                # prompt from a file
 echo "summarise yesterday's PRs" | agx run          # prompt from stdin
 agx run -i                                          # interactive TTY session
-agx run -d "summarise yesterday's PRs"               # detached (background); logs to session.log
+agx run -d "summarise yesterday's PRs"              # detached (background); logs to session.log
 agx run -n my-task "..."                            # explicit workspace name
-agx run -r owner/repo "fix the flaky test"          # target a specific repository
+agx run -r owner/repo "fix the flaky test"          # target a specific repository (-r is repeatable)
+agx run --model claude-opus-4-7 "..."              # model override
+agx run --memory 8g --cpus 4 "..."                 # container resource limits
+agx run --no-conduct "what files are here?"         # skip automatic conduct invocation
 
-agx ls                                              # list workspaces
+agx ps                                              # list running workspaces
+agx ps -a                                           # list all workspaces (including stopped)
+agx logs <name>                                     # print session log
+agx logs -f <name>                                  # tail session log
+agx logs --conduct <name>                           # show conductor journal
+agx logs --phase <phase> <name>                     # show output for a specific phase
+agx phases <name>                                   # list available phase outputs
+agx kill <name>                                     # stop a running container
+agx wait <name>                                     # block until container exits (propagates exit code)
+agx attach <name>                                   # open an interactive session in an existing workspace
+agx resume <name>                                   # re-run workspace with its original prompt
+agx resume -i <name>                                # resume interactively
+agx resume -d <name>                                # resume detached
 agx rm <name> [<name>...]                           # remove workspaces
 agx prune                                           # remove all (with confirmation)
-agx resume <name>                                   # resume an existing workspace interactively
+agx upgrade                                         # reinstall Claude skills from the current image
 ```
 
-Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file. Detached runs (`-d` / `--detach`) run the container in the background, printing the workspace name and log path to stderr on start, and are mutually exclusive with `--interactive`.
+Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file. Detached runs (`-d` / `--detach`) run the container in the background, printing the workspace name and log path to stderr on start, and are mutually exclusive with `--interactive`. Both `run` and `resume` support `-d`, `-i`, `--model`, `--memory`, and `--cpus`.
 
-Every non-empty headless or interactive prompt automatically prepends `invoke conduct skill`, so the `conduct` skill is the default entry point for all task-oriented runs. Pass `-i` without a prompt to drop into a plain Claude session without automatic conduct invocation.
+Every non-empty headless or interactive prompt automatically prepends `invoke conduct skill`, so the `conduct` skill is the default entry point for all task-oriented runs. Pass `--no-conduct` to skip this (useful for simple or exploratory prompts). Pass `-i` without a prompt to drop into a plain Claude session.
 
-The `--repo` / `-r` flag appends `Target repo: owner/repo` to the prompt. The `conduct` skill uses this to identify which repository to clone during the `clone` phase.
+`--repo` / `-r` is repeatable; each use appends `Target repo: owner/repo` to the prompt. The `conduct` skill uses these to identify which repositories to clone during the `clone` phase.
+
+`agx resume` re-runs a stopped workspace with its original prompt — it is not interactive by default. Use `-i` for a TTY session or `-d` to run it in the background. It refuses to start if the container is already running; use `agx kill` first.
 
 If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, non-alphanumeric → `-`, trimmed to 40 chars on a word boundary). If the prompt is empty, the name falls back to a `YYYY-MM-DD-HHMMSS` timestamp.
 
@@ -75,8 +92,11 @@ If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, 
 ├── workspaces/   → one subdir per session, bind-mounted as /workspace
 │   └── <name>/
 │       └── .agx/
+│           ├── meta.json         prompt, repos, start time, model
 │           ├── prompt.txt
-│           └── session.log
+│           ├── session.log
+│           ├── conduct.md        conductor journal
+│           └── phases/           phase prompts and outputs
 └── kb/           → bind-mounted as /kb (shared knowledge base)
     └── INDEX.md
 ```
@@ -97,7 +117,7 @@ Source lives under `image/plugin/`; edits there require an image rebuild (`make 
 ## Layout
 
 ```
-cmd/agx/         Go CLI (cobra) — bootstrap, run, resume, ls, rm, prune
+cmd/agx/         Go CLI (cobra) — bootstrap, run, resume, ps, logs, kill, attach, wait, phases, upgrade, rm, prune
 image/           Docker image
   Dockerfile     ubuntu:24.04 + node + gh + claude
   entrypoint.sh  picks headless vs interactive vs resume based on AGX_MODE
