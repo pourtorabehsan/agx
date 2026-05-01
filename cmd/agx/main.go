@@ -20,6 +20,7 @@ func main() {
 		newBootstrapCmd(),
 		newRunCmd(),
 		newResumeCmd(),
+		newLogsCmd(),
 		newLsCmd(),
 		newRmCmd(),
 		newPruneCmd(),

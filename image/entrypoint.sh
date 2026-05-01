@@ -14,7 +14,10 @@ prompt_file="${AGX_PROMPT_FILE:-/workspace/.agx/prompt.txt}"
 
 case "$mode" in
   headless)
-    exec claude -p "$(cat "$prompt_file")" --dangerously-skip-permissions
+    claude -p "$(cat "$prompt_file")" --dangerously-skip-permissions
+    rc=$?
+    echo "==> session exited: code=${rc} mode=${mode}"
+    exit "$rc"
     ;;
   interactive)
     if [ -s "$prompt_file" ]; then

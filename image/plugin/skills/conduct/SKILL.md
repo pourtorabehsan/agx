@@ -31,9 +31,34 @@ If the header is missing or malformed, treat the phase as `status: conditional, 
 
 ## Step 1: Capture context
 
-Skip if the task is obviously small (repo named explicitly, change is unambiguous and self-contained). Otherwise invoke the `capture` skill to produce `/workspace/CONTEXT.md` and read the result.
+**First**, write an initial entry to `/workspace/.agx/conduct.md` before doing anything else:
 
-Note any `[?]` open questions — carry them forward explicitly in each phase brief that can resolve them. Unresolved questions compound into bugs.
+```
+# Conduct Journal
+
+**Task:** <task description>
+**Started:** <timestamp from `date -u`>
+**Status:** initializing
+```
+
+This is your breadcrumb. If the session dies, this file shows where it got to.
+
+Next, check if `/workspace/CONTEXT.md` already exists and is non-empty (`[ -s /workspace/CONTEXT.md ]`). If it does, skip to Step 2 — a previous run already captured context.
+
+Otherwise, for any task that is not obviously small (single repo named explicitly, change unambiguous and self-contained), run `capture` **as a sub-session** — never inline. Inline invocation fills the conductor's context with research tool calls and causes premature session termination.
+
+```bash
+mkdir -p /workspace/.agx/phases
+claude -p "invoke capture skill
+
+Task: <task description from prompt>
+" --dangerously-skip-permissions > /workspace/.agx/phases/capture-output.md 2>&1
+echo "capture exit: $?"
+```
+
+After it exits, check that `/workspace/CONTEXT.md` exists. If it does not, treat this as a hard blocker: update `conduct.md` with `status: blocked — capture failed to write CONTEXT.md` and stop.
+
+Note any `[?]` open questions in CONTEXT.md — carry them forward explicitly in each phase brief that can resolve them. Unresolved questions compound into bugs.
 
 ## Step 2: Classify complexity
 
@@ -43,7 +68,7 @@ Note any `[?]` open questions — carry them forward explicitly in each phase br
 | **medium** | Single repo, non-trivial scope, needs a plan |
 | **large** | Multi-repo, unclear scope, design decisions required, or high risk |
 
-Write your classification, one-sentence reasoning, and initial phase list to `/workspace/.agx/conduct.md` — this is your journal and running log for the session.
+Update `/workspace/.agx/conduct.md` with your classification, one-sentence reasoning, and initial phase list. This is your first real checkpoint entry.
 
 ## Step 3: Build a phase list
 
@@ -82,6 +107,8 @@ You may skip review phases if the turn budget is tight and confidence is high. N
 ## Step 4: Execute phases
 
 For each phase:
+
+**0. Update** `/workspace/.agx/conduct.md`: append `| <turn> | <phase> | starting | spawning sub-session |` before spawning. This way a crash mid-phase is distinguishable from a phase that never started.
 
 **1. Write a brief** to `/workspace/.agx/phases/<name>-prompt.txt`. Include:
 - The persona (copy it verbatim from the table above — it shapes the sub-session's entire posture)
