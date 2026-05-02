@@ -31,6 +31,7 @@ func main() {
 		newRmCmd(),
 		newPruneCmd(),
 		newUpgradeCmd(),
+		newWsCmd(),
 	)
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "agx:", err)
