@@ -81,6 +81,7 @@ COPY entrypoint.sh /usr/local/bin/agx-entrypoint
 COPY bootstrap.sh  /usr/local/bin/agx-bootstrap
 RUN chmod +x /usr/local/bin/agx-entrypoint /usr/local/bin/agx-bootstrap
 COPY plugin/ /usr/local/share/agx/plugin/
+RUN chmod +x /usr/local/share/agx/plugin/post_bootstrap.sh
 
 USER agx
 WORKDIR /workspace

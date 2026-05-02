@@ -101,4 +101,12 @@ mkdir -p "$HOME/.claude/skills"
 cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
 cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
 
+# --- 7. Post-bootstrap hook ---
+post=/usr/local/share/agx/plugin/post_bootstrap.sh
+if [ -f "$post" ]; then
+  say "Running post_bootstrap.sh"
+  # shellcheck source=/dev/null
+  source "$post"
+fi
+
 say "Bootstrap complete."
