@@ -112,6 +112,29 @@ func TestRunArgs_WithResourceLimits(t *testing.T) {
 	}
 }
 
+func TestRunArgs_Attach(t *testing.T) {
+	got := RunArgs(RunConfig{
+		HomeDir:       "/h",
+		KbDir:         "/kb",
+		WorkspacePath: "/w/foo",
+		Attach:        true,
+	})
+	want := []string{
+		"run", "--rm", "--init",
+		"--name", "agx-foo",
+		"-it",
+		"-v", "/h:/home/agx",
+		"-v", "/kb:/kb",
+		"-v", "/w/foo:/workspace",
+		"-e", "AGX_MODE=attach",
+		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
+		"agx:latest",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
 func TestRunArgs_Resume(t *testing.T) {
 	got := RunArgs(RunConfig{
 		HomeDir:       "/h",

@@ -7,6 +7,7 @@ type RunConfig struct {
 	KbDir         string
 	WorkspacePath string
 	Interactive   bool
+	Attach        bool
 	Resume        bool
 	Model         string
 	Memory        string
@@ -27,6 +28,9 @@ func RunArgs(c RunConfig) []string {
 	mode := "headless"
 	args := []string{"run", "--rm", "--init", "--name", "agx-" + filepath.Base(c.WorkspacePath)}
 	switch {
+	case c.Attach:
+		args = append(args, "-it")
+		mode = "attach"
 	case c.Resume:
 		args = append(args, "-it")
 		mode = "resume"

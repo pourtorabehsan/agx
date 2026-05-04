@@ -27,7 +27,7 @@ func newAttachCmd() *cobra.Command {
 				HomeDir:       paths.HomeDir,
 				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
-				Resume:        true,
+				Attach:        true,
 			})...)
 			c.Stdin = os.Stdin
 			c.Stdout = os.Stdout

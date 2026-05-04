@@ -32,6 +32,18 @@ case "$mode" in
       exec claude --dangerously-skip-permissions "${model_args[@]}"
     fi
     ;;
+  attach)
+    orient=""
+    [ -s /workspace/.agx/prompt.txt ] && orient+="- /workspace/.agx/prompt.txt (original task)"$'\n'
+    [ -s /workspace/CONTEXT.md ]       && orient+="- /workspace/CONTEXT.md (project context)"$'\n'
+    [ -s /workspace/.agx/conduct.md ]  && orient+="- /workspace/.agx/conduct.md (session journal)"$'\n'
+    if [ -n "$orient" ]; then
+      exec claude --dangerously-skip-permissions "${model_args[@]}" \
+        "$(printf 'You are resuming an agx workspace. Read these files to orient yourself, then wait for instructions:\n%s' "$orient")"
+    else
+      exec claude --dangerously-skip-permissions "${model_args[@]}"
+    fi
+    ;;
   resume)
     exec claude --dangerously-skip-permissions "${model_args[@]}"
     ;;
