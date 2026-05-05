@@ -66,6 +66,13 @@ agx resume -d <name>                                # resume detached
 agx rm <name> [<name>...]                           # remove workspaces
 agx prune                                           # remove all (with confirmation)
 agx upgrade                                         # reinstall Claude skills from the current image
+agx cd <name>                                       # print workspace path (pair with shell function)
+```
+
+To actually `cd` into a workspace, add this to your shell profile:
+
+```sh
+agxcd() { cd "$(agx cd "$@")"; }
 ```
 
 Headless runs tee stdout/stderr into `<workspace>/.agx/session.log`. Interactive runs attach a TTY and skip the log file. Detached runs (`-d` / `--detach`) run the container in the background, printing the workspace name and log path to stderr on start, and are mutually exclusive with `--interactive`. Both `run` and `resume` support `-d`, `-i`, `--model`, `--memory`, and `--cpus`.
