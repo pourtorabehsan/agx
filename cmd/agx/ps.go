@@ -13,10 +13,9 @@ import (
 )
 
 func newPsCmd() *cobra.Command {
-	var all bool
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "ps",
-		Short: "List workspace containers (running only by default; -a for all)",
+		Short: "List all workspaces",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			paths, err := NewPaths()
@@ -35,12 +34,8 @@ func newPsCmd() *cobra.Command {
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "NAME\tCREATED\tSTATUS\tPROMPT")
 			for _, name := range names {
-				isRunning := running[name]
-				if !all && !isRunning {
-					continue
-				}
 				status := "stopped"
-				if isRunning {
+				if running[name] {
 					status = "running"
 				}
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
@@ -53,8 +48,6 @@ func newPsCmd() *cobra.Command {
 			return w.Flush()
 		},
 	}
-	cmd.Flags().BoolVarP(&all, "all", "a", false, "show all workspaces, not just running")
-	return cmd
 }
 
 func runningWorkspaces() (map[string]bool, error) {

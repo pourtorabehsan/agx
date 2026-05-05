@@ -51,8 +51,7 @@ agx run --model claude-opus-4-7 "..."              # model override
 agx run --memory 8g --cpus 4 "..."                 # container resource limits
 agx run --no-conduct "what files are here?"         # skip automatic conduct invocation
 
-agx ps                                              # list running workspaces
-agx ps -a                                           # list all workspaces (including stopped)
+agx ps                                              # list all workspaces
 agx logs <name>                                     # print session log
 agx logs -f <name>                                  # tail session log
 agx logs --conduct <name>                           # show conductor journal
