@@ -13,3 +13,5 @@ npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-
 npx skills add https://github.com/vercel-labs/next-skills --skill next-best-practices --global --all --yes
 npx skills add https://github.com/vercel-labs/next-skills --skill next-cache-components --global --all --yes
 npx skills add https://github.com/shadcn/ui --skill shadcn --global --all --yes
+npx skills add https://github.com/github/awesome-copilot --skill gh-cli --global --all --yes
+npx skills add https://github.com/github/awesome-copilot --skill git-commit --global --all --yes
