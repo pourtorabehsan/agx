@@ -19,12 +19,6 @@ if [ -n "${AGX_MODEL:-}" ]; then
   model_args=(--model "$AGX_MODEL")
 fi
 
-codex_workspace_instructions() {
-  if [ -f "$HOME/.codex/AGENTS.md" ] && [ ! -e /workspace/AGENTS.md ]; then
-    cp "$HOME/.codex/AGENTS.md" /workspace/AGENTS.md
-  fi
-}
-
 attach_prompt() {
   orient=""
   [ -s /workspace/.agx/prompt.txt ] && orient+="- /workspace/.agx/prompt.txt (original task)"$'\n'
@@ -45,7 +39,6 @@ case "$agent:$mode" in
     exit "$rc"
     ;;
   codex:headless)
-    codex_workspace_instructions
     set +e
     codex exec "${model_args[@]}" \
       --dangerously-bypass-approvals-and-sandbox \
@@ -66,7 +59,6 @@ case "$agent:$mode" in
     fi
     ;;
   codex:interactive)
-    codex_workspace_instructions
     if [ -s "$prompt_file" ]; then
       exec codex --dangerously-bypass-approvals-and-sandbox --cd /workspace "${model_args[@]}" "$(cat "$prompt_file")"
     else
@@ -82,7 +74,6 @@ case "$agent:$mode" in
     fi
     ;;
   codex:attach)
-    codex_workspace_instructions
     prompt="$(attach_prompt)"
     if [ -n "$prompt" ]; then
       exec codex --dangerously-bypass-approvals-and-sandbox --cd /workspace "${model_args[@]}" "$prompt"
@@ -94,7 +85,6 @@ case "$agent:$mode" in
     exec claude --dangerously-skip-permissions "${model_args[@]}"
     ;;
   codex:resume)
-    codex_workspace_instructions
     exec codex --dangerously-bypass-approvals-and-sandbox --cd /workspace "${model_args[@]}"
     ;;
   *)
