@@ -34,9 +34,9 @@ Interactively walks through:
 4. Optionally log in to Codex.
 5. Set `git` user.name / user.email.
 6. Pick a branch prefix for agent commits (stored in `~/.agx/home/.agxrc` as `AGX_BRANCH_PREFIX`).
-7. Install the bundled agent skills and placeholder instruction files into `~/.agx/home/.claude/` and `~/.agx/home/.codex/`.
+7. Install the bundled agent skills into `~/.agx/home/.agents/skills/`, symlink them into Claude, and install placeholder instruction files into `~/.agx/home/.claude/` and `~/.agx/home/.codex/`.
 
-Steps 1–6 are idempotent — re-running `bootstrap` skips anything already configured. Step 7 always reinstalls the skills, so re-running `bootstrap` after a `make build` picks up any skill changes.
+Steps 1–6 are idempotent — re-running `bootstrap` skips anything already configured. Step 7 always reinstalls the skills, so re-running `bootstrap` after a `make build` picks up any skill changes. Codex reads the bundled skills directly from `~/.agx/home/.agents/skills/`; Claude sees the same skill directories through symlinks in `~/.agx/home/.claude/skills/`.
 
 ## Usage
 
@@ -94,8 +94,9 @@ If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, 
 ├── home/         → bind-mounted as /home/agx in the container
 │   ├── .ssh/         SSH keys
 │   ├── .config/gh/   gh auth
-│   ├── .claude/      Claude credentials, skills, CLAUDE.md
-│   ├── .codex/       Codex credentials, skills, AGENTS.md
+│   ├── .agents/      canonical skill installs
+│   ├── .claude/      Claude credentials, skill symlinks, CLAUDE.md
+│   ├── .codex/       Codex credentials, AGENTS.md
 │   ├── .gitconfig
 │   └── .agxrc        AGX_BRANCH_PREFIX, etc.
 ├── workspaces/   → one subdir per session, bind-mounted as /workspace
@@ -114,12 +115,13 @@ The container runs as a non-root user whose UID/GID match the host invoker, so f
 
 ## The plugin
 
-The image bakes in four skills, installed into `~/.agx/home/.claude/` and `~/.agx/home/.codex/` on every `bootstrap`:
+The image bakes in five skills, installed into `~/.agx/home/.agents/skills/` on every `bootstrap`:
 
 - **`capture`** — gathers context from the kb, GitHub, Notion, and Slack into `/workspace/CONTEXT.md`. No code, no plan — just grounded context.
 - **`reflect`** — post-session retrospective. Writes durable learnings to `/kb` via the `kb` skill.
 - **`kb`** — read/write convention for the shared knowledge base at `/kb`. Reads `INDEX.md` first, greps for prior context, and appends new entries with a one-line index hook.
 - **`conduct`** — autonomous engineering conductor. Given a task involving code changes, classifies complexity, builds a phase plan, and delegates implementation to focused sub-sessions via the selected agent.
+- **`push`** — final release step that commits finished work on a feature branch, pushes it, and opens a draft PR.
 
 Source lives under `image/plugin/`; edits there require an image rebuild (`make build-image`) and a re-run of `agx bootstrap` to copy them into the host home.
 
@@ -138,6 +140,7 @@ image/           Docker image
       capture/   SKILL.md
       conduct/   SKILL.md
       kb/        SKILL.md
+      push/      SKILL.md
       reflect/   SKILL.md
 Makefile         build / build-cli / build-image / test / clean
 ```

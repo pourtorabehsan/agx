@@ -115,22 +115,24 @@ else
 fi
 
 # --- 6. Install agent skills and session defaults ---
-if [ -d "$HOME/.claude/skills/conduct" ]; then
-  say "Reinstalling agx Claude skills (overwriting existing)"
+if [ -d "$HOME/.agents/skills/conduct" ] || [ -L "$HOME/.claude/skills/conduct" ]; then
+  say "Reinstalling agx skills into ~/.agents/skills and relinking Claude"
 else
-  say "Installing agx Claude skills"
+  say "Installing agx skills into ~/.agents/skills and linking Claude"
 fi
-mkdir -p "$HOME/.claude/skills"
-cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
-cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
 
-if [ -d "$HOME/.codex/skills/conduct" ]; then
-  say "Reinstalling agx Codex skills (overwriting existing)"
-else
-  say "Installing agx Codex skills"
-fi
-mkdir -p "$HOME/.codex/skills"
-cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.codex/skills/"
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
+for skill_dir in /usr/local/share/agx/plugin/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  skill_name=$(basename "$skill_dir")
+  rm -rf "$HOME/.agents/skills/$skill_name"
+  cp -R "$skill_dir" "$HOME/.agents/skills/$skill_name"
+
+  rm -rf "$HOME/.claude/skills/$skill_name"
+  ln -s "../../.agents/skills/$skill_name" "$HOME/.claude/skills/$skill_name"
+done
+
+cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
 cp /usr/local/share/agx/plugin/AGENTS.md "$HOME/.codex/AGENTS.md"
 
 # --- 7. Post-bootstrap hook ---
