@@ -6,6 +6,7 @@ type RunConfig struct {
 	HomeDir       string
 	KbDir         string
 	WorkspacePath string
+	Agent         Agent
 	Interactive   bool
 	Attach        bool
 	Resume        bool
@@ -26,6 +27,10 @@ func BootstrapArgs(homeDir, kbDir string) []string {
 
 func RunArgs(c RunConfig) []string {
 	mode := "headless"
+	agent := c.Agent
+	if agent == "" {
+		agent = DefaultAgent()
+	}
 	args := []string{"run", "--rm", "--init", "--name", "agx-" + filepath.Base(c.WorkspacePath)}
 	switch {
 	case c.Attach:
@@ -49,6 +54,7 @@ func RunArgs(c RunConfig) []string {
 		"-v", c.KbDir+":/kb",
 		"-v", c.WorkspacePath+":/workspace",
 		"-e", "AGX_MODE="+mode,
+		"-e", "AGX_AGENT="+agent.String(),
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 	)
 	if c.Model != "" {

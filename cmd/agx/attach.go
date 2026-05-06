@@ -10,9 +10,11 @@ import (
 )
 
 func newAttachCmd() *cobra.Command {
-	return &cobra.Command{
+	var agentName string
+
+	cmd := &cobra.Command{
 		Use:   "attach NAME",
-		Short: "Open an interactive Claude session in an existing workspace",
+		Short: "Open an interactive agent session in an existing workspace",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			paths, err := NewPaths()
@@ -23,10 +25,21 @@ func newAttachCmd() *cobra.Command {
 			if _, err := os.Stat(wsPath); os.IsNotExist(err) {
 				return fmt.Errorf("workspace %q not found — run 'agx ps -a' to list workspaces", args[0])
 			}
+			agent := DefaultAgent()
+			if meta, err := ReadMeta(wsPath); err == nil {
+				agent = meta.Agent
+			}
+			if cmd.Flags().Changed("agent") {
+				agent, err = ParseAgent(agentName)
+				if err != nil {
+					return err
+				}
+			}
 			c := exec.Command("docker", RunArgs(RunConfig{
 				HomeDir:       paths.HomeDir,
 				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
+				Agent:         agent,
 				Attach:        true,
 			})...)
 			c.Stdin = os.Stdin
@@ -42,4 +55,6 @@ func newAttachCmd() *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().StringVar(&agentName, "agent", "", "agent override (claude or codex; defaults to workspace agent)")
+	return cmd
 }

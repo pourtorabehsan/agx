@@ -3,8 +3,16 @@ set -euo pipefail
 
 say()   { printf '==> %s\n' "$*"; }
 pause() { read -r -p "$1" _; }
+confirm() {
+  local answer
+  read -r -p "$1 [y/N] " answer
+  case "${answer,,}" in
+    y|yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
-mkdir -p "$HOME/.ssh" "$HOME/.claude" "$HOME/.config/gh"
+mkdir -p "$HOME/.ssh" "$HOME/.claude" "$HOME/.codex" "$HOME/.config/gh"
 chmod 700 "$HOME/.ssh"
 
 # --- 1. SSH key ---
@@ -43,14 +51,29 @@ else
   say "gh already authenticated, skipping."
 fi
 
-# --- 3. claude login ---
+# --- 3. agent logins ---
 if [ ! -f "$HOME/.claude/.credentials.json" ]; then
-  say "Logging into Claude"
-  # NOTE: verify the exact login invocation against the installed claude CLI.
-  # `claude /login` is the current best-effort default.
-  claude /login
+  if confirm "Do you want to login to Claude?"; then
+    say "Logging into Claude"
+    # NOTE: verify the exact login invocation against the installed claude CLI.
+    # `claude /login` is the current best-effort default.
+    claude /login
+  else
+    say "Skipping Claude login."
+  fi
 else
   say "Claude already authenticated, skipping."
+fi
+
+if [ ! -f "$HOME/.codex/auth.json" ]; then
+  if confirm "Do you want to login to Codex?"; then
+    say "Logging into Codex"
+    codex login --device-auth
+  else
+    say "Skipping Codex login."
+  fi
+else
+  say "Codex already authenticated, skipping."
 fi
 
 # --- 4. git identity ---
@@ -91,7 +114,7 @@ else
   say "AGX_BRANCH_PREFIX already set, skipping."
 fi
 
-# --- 6. Install Claude skills and session defaults ---
+# --- 6. Install agent skills and session defaults ---
 if [ -d "$HOME/.claude/skills/conduct" ]; then
   say "Reinstalling agx Claude skills (overwriting existing)"
 else
@@ -100,6 +123,15 @@ fi
 mkdir -p "$HOME/.claude/skills"
 cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.claude/skills/"
 cp /usr/local/share/agx/plugin/CLAUDE.md "$HOME/.claude/CLAUDE.md"
+
+if [ -d "$HOME/.codex/skills/conduct" ]; then
+  say "Reinstalling agx Codex skills (overwriting existing)"
+else
+  say "Installing agx Codex skills"
+fi
+mkdir -p "$HOME/.codex/skills"
+cp -r /usr/local/share/agx/plugin/skills/. "$HOME/.codex/skills/"
+cp /usr/local/share/agx/plugin/AGENTS.md "$HOME/.codex/AGENTS.md"
 
 # --- 7. Post-bootstrap hook ---
 post=/usr/local/share/agx/plugin/post_bootstrap.sh

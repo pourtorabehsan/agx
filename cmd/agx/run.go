@@ -15,13 +15,13 @@ import (
 )
 
 func newRunCmd() *cobra.Command {
-	var file, name, model, memory, cpus string
+	var file, name, agentName, model, memory, cpus string
 	var repos []string
 	var interactive, detach, noConductConduct bool
 
 	cmd := &cobra.Command{
 		Use:   "run [PROMPT]",
-		Short: "Run a Claude Code session in a container",
+		Short: "Run an agent session in a container",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var arg string
@@ -31,6 +31,10 @@ func newRunCmd() *cobra.Command {
 
 			if detach && interactive {
 				return errors.New("--detach and --interactive are mutually exclusive")
+			}
+			agent, err := ParseAgent(agentName)
+			if err != nil {
+				return err
 			}
 
 			stdinIsTTY := term.IsTerminal(int(os.Stdin.Fd()))
@@ -65,6 +69,7 @@ func newRunCmd() *cobra.Command {
 				Prompt:  firstLine(prompt, 80),
 				Repos:   repos,
 				Started: time.Now().UTC().Format(time.RFC3339),
+				Agent:   agent,
 				Model:   model,
 			}); err != nil {
 				return err
@@ -86,6 +91,7 @@ func newRunCmd() *cobra.Command {
 				HomeDir:       paths.HomeDir,
 				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
+				Agent:         agent,
 				Interactive:   interactive,
 				Model:         model,
 				Memory:        memory,
@@ -133,7 +139,8 @@ func newRunCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&file, "file", "f", "", "read prompt from file")
 	cmd.Flags().StringVarP(&name, "name", "n", "", "workspace name")
 	cmd.Flags().StringArrayVarP(&repos, "repo", "r", nil, "target repository (owner/name); repeatable")
-	cmd.Flags().StringVar(&model, "model", "", "model override (e.g. claude-opus-4-7)")
+	cmd.Flags().StringVar(&agentName, "agent", string(DefaultAgent()), "agent to run (claude or codex)")
+	cmd.Flags().StringVar(&model, "model", "", "model override for the selected agent")
 	cmd.Flags().StringVar(&memory, "memory", "", "container memory limit (e.g. 8g)")
 	cmd.Flags().StringVar(&cpus, "cpus", "", "container CPU limit (e.g. 4)")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")

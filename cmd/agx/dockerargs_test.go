@@ -33,6 +33,7 @@ func TestRunArgs_Headless(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=headless",
+		"-e", "AGX_AGENT=codex",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"agx:latest",
 	}
@@ -56,6 +57,7 @@ func TestRunArgs_Interactive(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=interactive",
+		"-e", "AGX_AGENT=codex",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"agx:latest",
 	}
@@ -78,6 +80,7 @@ func TestRunArgs_WithModel(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=headless",
+		"-e", "AGX_AGENT=codex",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"-e", "AGX_MODEL=claude-opus-4-7",
 		"agx:latest",
@@ -104,6 +107,7 @@ func TestRunArgs_WithResourceLimits(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=headless",
+		"-e", "AGX_AGENT=codex",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"agx:latest",
 	}
@@ -127,6 +131,7 @@ func TestRunArgs_Attach(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=attach",
+		"-e", "AGX_AGENT=codex",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"agx:latest",
 	}
@@ -150,6 +155,53 @@ func TestRunArgs_Resume(t *testing.T) {
 		"-v", "/kb:/kb",
 		"-v", "/w/foo:/workspace",
 		"-e", "AGX_MODE=resume",
+		"-e", "AGX_AGENT=codex",
+		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
+		"agx:latest",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestRunArgs_CodexAgent(t *testing.T) {
+	got := RunArgs(RunConfig{
+		HomeDir:       "/h",
+		KbDir:         "/kb",
+		WorkspacePath: "/w/foo",
+		Agent:         AgentCodex,
+	})
+	want := []string{
+		"run", "--rm", "--init",
+		"--name", "agx-foo",
+		"-v", "/h:/home/agx",
+		"-v", "/kb:/kb",
+		"-v", "/w/foo:/workspace",
+		"-e", "AGX_MODE=headless",
+		"-e", "AGX_AGENT=codex",
+		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
+		"agx:latest",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestRunArgs_ClaudeAgent(t *testing.T) {
+	got := RunArgs(RunConfig{
+		HomeDir:       "/h",
+		KbDir:         "/kb",
+		WorkspacePath: "/w/foo",
+		Agent:         AgentClaude,
+	})
+	want := []string{
+		"run", "--rm", "--init",
+		"--name", "agx-foo",
+		"-v", "/h:/home/agx",
+		"-v", "/kb:/kb",
+		"-v", "/w/foo:/workspace",
+		"-e", "AGX_MODE=headless",
+		"-e", "AGX_AGENT=claude",
 		"-e", "AGX_PROMPT_FILE=/workspace/.agx/prompt.txt",
 		"agx:latest",
 	}

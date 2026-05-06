@@ -13,7 +13,7 @@ import (
 )
 
 func newResumeCmd() *cobra.Command {
-	var model, memory, cpus string
+	var agentName, model, memory, cpus string
 	var detach, interactive bool
 
 	cmd := &cobra.Command{
@@ -42,9 +42,22 @@ func newResumeCmd() *cobra.Command {
 				return fmt.Errorf("workspace %q is currently running — stop it first with 'agx kill %s'", wsName, wsName)
 			}
 
+			agent := DefaultAgent()
+			meta, metaErr := ReadMeta(wsPath)
+			if metaErr == nil {
+				agent = meta.Agent
+			}
+			if cmd.Flags().Changed("agent") {
+				agent, err = ParseAgent(agentName)
+				if err != nil {
+					return err
+				}
+			}
+
 			// update started time in meta so ps -a reflects the new run
-			if meta, err := ReadMeta(wsPath); err == nil {
+			if metaErr == nil {
 				meta.Started = time.Now().UTC().Format(time.RFC3339)
+				meta.Agent = agent
 				if model != "" {
 					meta.Model = model
 				}
@@ -55,6 +68,7 @@ func newResumeCmd() *cobra.Command {
 				HomeDir:       paths.HomeDir,
 				KbDir:         paths.KbDir,
 				WorkspacePath: wsPath,
+				Agent:         agent,
 				Interactive:   interactive,
 				Model:         model,
 				Memory:        memory,
@@ -101,7 +115,8 @@ func newResumeCmd() *cobra.Command {
 
 	cmd.Flags().BoolVarP(&detach, "detach", "d", false, "run in background; logs go to workspace session.log")
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "attach a TTY")
-	cmd.Flags().StringVar(&model, "model", "", "model override (e.g. claude-opus-4-7)")
+	cmd.Flags().StringVar(&agentName, "agent", "", "agent override (claude or codex; defaults to workspace agent)")
+	cmd.Flags().StringVar(&model, "model", "", "model override for the selected agent")
 	cmd.Flags().StringVar(&memory, "memory", "", "container memory limit (e.g. 8g)")
 	cmd.Flags().StringVar(&cpus, "cpus", "", "container CPU limit (e.g. 4)")
 	return cmd

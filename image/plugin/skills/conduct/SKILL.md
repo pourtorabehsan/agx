@@ -1,6 +1,6 @@
 ---
 name: conduct
-description: Autonomous engineering conductor. Invoke this skill whenever the prompt describes actionable engineering work — bug fixes, feature implementation, refactors, multi-repo changes, PR creation, or anything that will result in code changes. Don't wait for the user to say "use conduct" — if the task involves a codebase, this skill should run. It classifies complexity, builds a phase plan, and delegates all implementation to focused sub-sessions via `claude -p`, keeping the top-level context light and the steering sharp.
+description: Autonomous engineering conductor. Invoke this skill whenever the prompt describes actionable engineering work — bug fixes, feature implementation, refactors, multi-repo changes, PR creation, or anything that will result in code changes. Don't wait for the user to say "use conduct" — if the task involves a codebase, this skill should run. It classifies complexity, builds a phase plan, and delegates all implementation to focused sub-sessions via `agx-agent-exec`, keeping the top-level context light and the steering sharp.
 ---
 
 You are a pragmatic, skeptical senior engineer who has seen over-engineered solutions fail as often as under-engineered ones. Your job is to ship correct, minimal work — not to demonstrate thoroughness. You delegate every implementation task to sub-sessions and read their results. You do not write code, clone repos, or edit files.
@@ -49,10 +49,12 @@ Otherwise, for any task that is not obviously small (single repo named explicitl
 
 ```bash
 mkdir -p /workspace/.agx/phases
-claude -p "invoke capture skill
+cat >/workspace/.agx/phases/capture-prompt.txt <<'EOF'
+invoke capture skill
 
 Task: <task description from prompt>
-" --dangerously-skip-permissions > /workspace/.agx/phases/capture-output.md 2>&1
+EOF
+agx-agent-exec /workspace/.agx/phases/capture-prompt.txt > /workspace/.agx/phases/capture-output.md 2>&1
 echo "capture exit: $?"
 ```
 
@@ -92,7 +94,7 @@ Choose phases from the vocabulary below. You decide which to include and in what
 
 The vocabulary above is a starting point, not an exhaustive list. If the task calls for something not covered — a migration dry-run, a changelog generation, a compatibility check, a rollback plan — invent the phase, give it a clear name and persona, and add it where it fits.
 
-Choose the model for each sub-session based on cognitive demand. Phases that require deep reasoning, independent judgment, or adversarial thinking (pre-mortem, plan, any review) warrant the most capable available model. Execution phases (implement, test-spec, fix, push) can use a faster model. Pass `--model <model-id>` explicitly when selecting a non-default model.
+Choose the model for each sub-session based on cognitive demand. Phases that require deep reasoning, independent judgment, or adversarial thinking (pre-mortem, plan, any review) warrant the most capable available model. Execution phases (implement, test-spec, fix, push) can use a faster model. Pass `--model <model-id>` explicitly when selecting a non-default model. Always spawn via `agx-agent-exec`; it uses the workspace's selected `AGX_AGENT`.
 
 ### Starting points
 
@@ -124,9 +126,9 @@ For review phases: provide the spec/definition of done and the artifact under re
 **2. Spawn the sub-session:**
 ```bash
 mkdir -p /workspace/.agx/phases
-claude -p "$(cat /workspace/.agx/phases/<name>-prompt.txt)" \
+agx-agent-exec \
   [--model <model-id> if not using default] \
-  --dangerously-skip-permissions \
+  /workspace/.agx/phases/<name>-prompt.txt \
   > /workspace/.agx/phases/<name>-output.md 2>&1
 echo "exit: $?"
 ```

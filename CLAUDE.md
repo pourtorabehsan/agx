@@ -17,7 +17,7 @@ Development rules for working on `agx`. Project context lives in `README.md` and
 ## Image
 
 - After editing anything under `image/plugin/`, both `make build-image` **and** `agx bootstrap` are required to land it in the user home. Rebuild alone won't do it.
-- If you touch the Claude install path, relocation, or cleanup in `image/Dockerfile`, verify `claude --version` runs in a fresh container before claiming done.
+- If you touch the Claude or Codex install path, relocation, or cleanup in `image/Dockerfile`, verify `claude --version` and `codex --version` run in a fresh container before claiming done.
 - Pin `GO_VERSION` in `image/Dockerfile` to match `go.mod`. Bump them together.
 
 ## Git

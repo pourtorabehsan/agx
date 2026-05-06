@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ARG TARGETARCH
 RUN test -n "${TARGETARCH}" || (echo "TARGETARCH unset — build with BuildKit" >&2 && exit 1)
 
-# Node.js 22 — several Claude Code subsystems expect a working node.
+# Node.js 22 — Claude Code and Codex both expect a working node.
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
  && rm -rf /var/lib/apt/lists/*
@@ -76,10 +76,16 @@ RUN set -eux; \
     rm -rf /home/agx/.local /home/agx/.claude /home/agx/.cache /home/agx/.npm /home/agx/.claude.json; \
     /usr/local/bin/claude --version
 
-# Scripts and Claude commands/skills baked into the image
+# Install Codex CLI. It lives under the global npm prefix, outside the
+# bind-mounted runtime home.
+RUN npm install -g @openai/codex \
+ && codex --version
+
+# Scripts and agent commands/skills baked into the image
 COPY entrypoint.sh /usr/local/bin/agx-entrypoint
 COPY bootstrap.sh  /usr/local/bin/agx-bootstrap
-RUN chmod +x /usr/local/bin/agx-entrypoint /usr/local/bin/agx-bootstrap
+COPY agent-exec.sh /usr/local/bin/agx-agent-exec
+RUN chmod +x /usr/local/bin/agx-entrypoint /usr/local/bin/agx-bootstrap /usr/local/bin/agx-agent-exec
 COPY plugin/ /usr/local/share/agx/plugin/
 RUN chmod +x /usr/local/share/agx/plugin/post_bootstrap.sh
 

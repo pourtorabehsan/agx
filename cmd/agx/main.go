@@ -14,7 +14,7 @@ import (
 func main() {
 	root := &cobra.Command{
 		Use:           "agx",
-		Short:         "Run sandboxed Claude Code sessions in Docker",
+		Short:         "Run sandboxed agent sessions in Docker",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}

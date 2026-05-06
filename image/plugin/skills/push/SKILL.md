@@ -7,9 +7,26 @@ You are a careful release engineer. Your only job is to get finished work into a
 
 ## Steps
 
-### 1. Verify branch
+### 1. Ensure feature branch
 
-Run `git branch --show-current`. If you are on `main`, `master`, or the repo's default branch, stop — write the output file with `status: fail` and blocker "refusing to push: on default branch".
+Detect the default branch:
+
+```bash
+default_branch=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+current_branch=$(git branch --show-current)
+```
+
+If `current_branch` is empty, stop — write the output file with `status: fail` and blocker "refusing to push: detached HEAD".
+
+If `current_branch` is `main`, `master`, or the detected default branch, create a feature branch before committing:
+
+```bash
+prefix="${AGX_BRANCH_PREFIX:-agx}"
+slug="<short-kebab-case-summary-of-change>"
+git switch -c "${prefix}/${slug}"
+```
+
+The slug must be lowercase, descriptive, and no more than 40 characters. If already on a non-default branch, stay on it.
 
 ### 2. Commit if needed
 
@@ -30,13 +47,7 @@ git push -u origin HEAD
 
 If this fails, record the error as a blocker and stop.
 
-### 4. Detect default branch
-
-```bash
-gh repo view --json defaultBranchRef --jq .defaultBranchRef.name
-```
-
-### 5. Find and fill any PR template
+### 4. Find and fill any PR template
 
 Check these paths in priority order, relative to the repo root:
 
@@ -51,19 +62,19 @@ If a template is found, read it and fill in every section with content appropria
 
 If no template exists, write a short body: one paragraph describing what changed and why.
 
-### 6. Create draft PR
+### 5. Create draft PR
 
 ```bash
 gh pr create \
   --draft \
   --title "<short imperative title, ≤72 chars, no trailing period>" \
-  --body "<filled body from step 5>" \
-  --base <default-branch>
+  --body "<filled body from step 4>" \
+  --base "$default_branch"
 ```
 
 Record the PR URL from the output.
 
-### 7. Write output
+### 6. Write output
 
 Write to the path specified in your brief:
 

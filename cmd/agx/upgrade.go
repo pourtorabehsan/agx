@@ -11,7 +11,7 @@ import (
 func newUpgradeCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "upgrade",
-		Short: "Reinstall Claude skills from the current image (run 'make build-image' first to pick up image changes)",
+		Short: "Reinstall agent skills and instructions from the current image (run 'make build-image' first to pick up image changes)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			paths, err := NewPaths()

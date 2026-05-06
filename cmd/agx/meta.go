@@ -10,10 +10,14 @@ type Meta struct {
 	Prompt  string   `json:"prompt"`
 	Repos   []string `json:"repos"`
 	Started string   `json:"started"`
+	Agent   Agent    `json:"agent,omitempty"`
 	Model   string   `json:"model,omitempty"`
 }
 
 func WriteMeta(wsPath string, m Meta) error {
+	if m.Agent == "" {
+		m.Agent = DefaultAgent()
+	}
 	data, err := json.Marshal(m)
 	if err != nil {
 		return err
@@ -29,6 +33,9 @@ func ReadMeta(wsPath string) (Meta, error) {
 	var m Meta
 	if err := json.Unmarshal(data, &m); err != nil {
 		return Meta{}, err
+	}
+	if m.Agent == "" {
+		m.Agent = DefaultAgent()
 	}
 	return m, nil
 }
