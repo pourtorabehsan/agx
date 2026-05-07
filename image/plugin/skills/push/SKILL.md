@@ -21,12 +21,17 @@ If `current_branch` is empty, stop — write the output file with `status: fail`
 If `current_branch` is `main`, `master`, or the detected default branch, create a feature branch before committing:
 
 ```bash
-prefix="${AGX_BRANCH_PREFIX:-agx}"
+configured_prefix="${AGX_BRANCH_PREFIX:-}"
+conventional_prefix="<fix|feat|chore|docs|test|refactor>"
 slug="<short-kebab-case-summary-of-change>"
-git switch -c "${prefix}/${slug}"
+if [ -n "$configured_prefix" ]; then
+  git switch -c "${configured_prefix}/${slug}"
+else
+  git switch -c "${conventional_prefix}/${slug}"
+fi
 ```
 
-The slug must be lowercase, descriptive, and no more than 40 characters. If already on a non-default branch, stay on it.
+Choose the conventional prefix from the change type: `fix` for bug fixes, `feat` for user-facing features, `docs` for documentation-only changes, `test` for test-only changes, `refactor` for behavior-preserving code restructuring, and `chore` for maintenance/build/tooling work. Do not use `agx` as a fallback prefix. The slug must be lowercase, descriptive, and no more than 40 characters. If already on a non-default branch, stay on it.
 
 ### 2. Commit if needed
 
