@@ -32,17 +32,20 @@ func newPsCmd() *cobra.Command {
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tCREATED\tSTATUS\tPROMPT")
+			fmt.Fprintln(w, "NAME\tCREATED\tSTATUS\tAGENT\tMODEL\tPROMPT")
 			for _, name := range names {
 				status := "stopped"
 				if running[name] {
 					status = "running"
 				}
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+				wsPath := paths.Workspace(name)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
 					name,
-					wsCreated(paths.Workspace(name)),
+					wsCreated(wsPath),
 					status,
-					wsPrompt(paths.Workspace(name)),
+					wsAgent(wsPath),
+					wsModel(wsPath),
+					wsPrompt(wsPath),
 				)
 			}
 			return w.Flush()
@@ -95,6 +98,20 @@ func wsPrompt(wsPath string) string {
 		}
 	}
 	return ""
+}
+
+func wsAgent(wsPath string) string {
+	if meta, err := ReadMeta(wsPath); err == nil {
+		return meta.Agent.String()
+	}
+	return DefaultAgent().String()
+}
+
+func wsModel(wsPath string) string {
+	if meta, err := ReadMeta(wsPath); err == nil && meta.Model != "" {
+		return meta.Model
+	}
+	return "default"
 }
 
 func truncate(s string, n int) string {

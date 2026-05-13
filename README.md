@@ -85,7 +85,7 @@ Every non-empty headless or interactive prompt automatically prepends `invoke co
 
 `agx resume` re-runs a stopped workspace with its original prompt — it is not interactive by default. Use `-i` for a TTY session or `-d` to run it in the background. It refuses to start if the container is already running; use `agx kill` first.
 
-If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, non-alphanumeric → `-`, trimmed to 40 chars on a word boundary). If the prompt is empty, the name falls back to a `YYYY-MM-DD-HHMMSS` timestamp.
+If `--name` is omitted, the workspace name is a slug of the prompt (lowercased, non-alphanumeric -> `-`, prompt part trimmed to 40 chars) plus a nanosecond timestamp suffix (`YYYY-MM-DD-HHMMSS-nnnnnnnnn`). If the prompt is empty, the name is just that timestamp.
 
 ## What lives where
 

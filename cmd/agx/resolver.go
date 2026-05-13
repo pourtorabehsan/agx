@@ -53,8 +53,13 @@ func ResolveWorkspaceName(flagName, prompt string, now time.Time) (string, error
 		}
 		return s, nil
 	}
+	ts := WorkspaceTimestamp(now)
 	if s := Slug(prompt); s != "" {
-		return s, nil
+		return s + "-" + ts, nil
 	}
-	return now.Format("2006-01-02-150405"), nil
+	return ts, nil
+}
+
+func WorkspaceTimestamp(t time.Time) string {
+	return fmt.Sprintf("%s-%09d", t.Format("2006-01-02-150405"), t.Nanosecond())
 }

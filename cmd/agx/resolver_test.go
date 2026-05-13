@@ -87,9 +87,9 @@ func TestResolveWorkspaceName(t *testing.T) {
 	}{
 		{"my-ws", "anything", "my-ws"},
 		{"My Workspace!", "anything", "my-workspace"}, // flag is slugified
-		{"", "Refactor AUTH!!", "refactor-auth"},
-		{"", "", "2026-04-21-143022"},
-		{"", "!!!", "2026-04-21-143022"}, // slug empties out
+		{"", "Refactor AUTH!!", "refactor-auth-2026-04-21-143022-000000000"},
+		{"", "", "2026-04-21-143022-000000000"},
+		{"", "!!!", "2026-04-21-143022-000000000"}, // slug empties out
 	}
 	for _, c := range cases {
 		got, err := ResolveWorkspaceName(c.flag, c.prompt, fixed)
@@ -105,5 +105,12 @@ func TestResolveWorkspaceName(t *testing.T) {
 	// All-special-char name should error.
 	if _, err := ResolveWorkspaceName("!!!", "anything", fixed); err == nil {
 		t.Error("expected error for unsluggable --name")
+	}
+}
+
+func TestWorkspaceTimestampIncludesNanoseconds(t *testing.T) {
+	fixed := time.Date(2026, 4, 21, 14, 30, 22, 123456789, time.UTC)
+	if got, want := WorkspaceTimestamp(fixed), "2026-04-21-143022-123456789"; got != want {
+		t.Fatalf("WorkspaceTimestamp() = %q, want %q", got, want)
 	}
 }
