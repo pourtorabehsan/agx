@@ -16,6 +16,21 @@ func EnsureWorkspace(workspacesDir, name string) (string, error) {
 	return p, nil
 }
 
+func EnsureNewWorkspace(workspacesDir, name string) (string, error) {
+	if err := os.MkdirAll(workspacesDir, 0o755); err != nil {
+		return "", fmt.Errorf("create workspaces dir: %w", err)
+	}
+	p := filepath.Join(workspacesDir, name)
+	if err := os.Mkdir(p, 0o755); err != nil {
+		return "", fmt.Errorf("create workspace: %w", err)
+	}
+	if err := os.Mkdir(filepath.Join(p, ".agx"), 0o755); err != nil {
+		_ = os.RemoveAll(p)
+		return "", fmt.Errorf("create workspace metadata dir: %w", err)
+	}
+	return p, nil
+}
+
 func ListWorkspaces(workspacesDir string) ([]string, error) {
 	entries, err := os.ReadDir(workspacesDir)
 	if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
+
+const workspaceIDAttempts = 10
 
 func newRunCmd() *cobra.Command {
 	var file, name, agentName, model, memory, cpus string
@@ -56,11 +59,7 @@ func newRunCmd() *cobra.Command {
 				return fmt.Errorf("%s missing — run 'agx bootstrap' first", paths.HomeDir)
 			}
 
-			wsName, err := ResolveWorkspaceName(name, prompt, time.Now())
-			if err != nil {
-				return err
-			}
-			wsPath, err := EnsureWorkspace(paths.Workspaces, wsName)
+			wsName, wsPath, err := EnsureRunWorkspace(paths.Workspaces, name)
 			if err != nil {
 				return err
 			}
@@ -147,6 +146,38 @@ func newRunCmd() *cobra.Command {
 	cmd.Flags().BoolVarP(&detach, "detach", "d", false, "run in background; logs go to workspace session.log")
 	cmd.Flags().BoolVar(&noConductConduct, "no-conduct", false, "skip the 'invoke conduct skill' prefix (use for simple/exploratory prompts)")
 	return cmd
+}
+
+func EnsureRunWorkspace(workspacesDir, flagName string) (string, string, error) {
+	if flagName != "" {
+		wsName, err := ResolveWorkspaceName(flagName, "")
+		if err != nil {
+			return "", "", err
+		}
+		wsPath, err := EnsureWorkspace(workspacesDir, wsName)
+		return wsName, wsPath, err
+	}
+
+	for range workspaceIDAttempts {
+		id, err := NewWorkspaceID(rand.Reader)
+		if err != nil {
+			return "", "", err
+		}
+		wsName, err := ResolveWorkspaceName("", id)
+		if err != nil {
+			return "", "", err
+		}
+		wsPath, err := EnsureNewWorkspace(workspacesDir, wsName)
+		if err == nil {
+			return wsName, wsPath, nil
+		}
+		if errors.Is(err, os.ErrExist) {
+			continue
+		}
+		return "", "", err
+	}
+
+	return "", "", fmt.Errorf("generate unique workspace ID after %d attempts", workspaceIDAttempts)
 }
 
 func firstLine(s string, max int) string {

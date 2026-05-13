@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestResolvePrompt_Arg(t *testing.T) {
@@ -81,36 +80,39 @@ func TestResolvePrompt_NoSourceNonInteractive(t *testing.T) {
 }
 
 func TestResolveWorkspaceName(t *testing.T) {
-	fixed := time.Date(2026, 4, 21, 14, 30, 22, 0, time.UTC)
 	cases := []struct {
-		flag, prompt, want string
+		flag, generatedID, want string
 	}{
-		{"my-ws", "anything", "my-ws"},
-		{"My Workspace!", "anything", "my-workspace"}, // flag is slugified
-		{"", "Refactor AUTH!!", "refactor-auth-2026-04-21-143022-000000000"},
-		{"", "", "2026-04-21-143022-000000000"},
-		{"", "!!!", "2026-04-21-143022-000000000"}, // slug empties out
+		{flag: "my-ws", generatedID: "000102030405", want: "my-ws"},
+		{flag: "My Workspace!", generatedID: "000102030405", want: "my-workspace"}, // flag is slugified
+		{generatedID: "000102030405", want: "000102030405"},
 	}
 	for _, c := range cases {
-		got, err := ResolveWorkspaceName(c.flag, c.prompt, fixed)
+		got, err := ResolveWorkspaceName(c.flag, c.generatedID)
 		if err != nil {
-			t.Errorf("ResolveWorkspaceName(%q,%q) unexpected error: %v", c.flag, c.prompt, err)
+			t.Errorf("ResolveWorkspaceName(%q,%q) unexpected error: %v", c.flag, c.generatedID, err)
 			continue
 		}
 		if got != c.want {
-			t.Errorf("ResolveWorkspaceName(%q,%q) = %q, want %q", c.flag, c.prompt, got, c.want)
+			t.Errorf("ResolveWorkspaceName(%q,%q) = %q, want %q", c.flag, c.generatedID, got, c.want)
 		}
 	}
 
 	// All-special-char name should error.
-	if _, err := ResolveWorkspaceName("!!!", "anything", fixed); err == nil {
+	if _, err := ResolveWorkspaceName("!!!", "000102030405"); err == nil {
 		t.Error("expected error for unsluggable --name")
+	}
+	if _, err := ResolveWorkspaceName("", ""); err == nil {
+		t.Error("expected error for empty generated ID")
 	}
 }
 
-func TestWorkspaceTimestampIncludesNanoseconds(t *testing.T) {
-	fixed := time.Date(2026, 4, 21, 14, 30, 22, 123456789, time.UTC)
-	if got, want := WorkspaceTimestamp(fixed), "2026-04-21-143022-123456789"; got != want {
-		t.Fatalf("WorkspaceTimestamp() = %q, want %q", got, want)
+func TestNewWorkspaceID(t *testing.T) {
+	got, err := NewWorkspaceID(strings.NewReader("\x00\x01\x02\x03\x04\x05"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "000102030405"; got != want {
+		t.Fatalf("NewWorkspaceID() = %q, want %q", got, want)
 	}
 }

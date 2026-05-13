@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-	"time"
 )
+
+const workspaceIDBytes = 6
 
 type PromptSources struct {
 	Arg         string
@@ -45,7 +47,7 @@ func ResolvePrompt(s PromptSources) (string, error) {
 	return "", errors.New("no prompt provided (use positional arg, -f FILE, stdin, or -i)")
 }
 
-func ResolveWorkspaceName(flagName, prompt string, now time.Time) (string, error) {
+func ResolveWorkspaceName(flagName, generatedID string) (string, error) {
 	if flagName != "" {
 		s := Slug(flagName)
 		if s == "" {
@@ -53,13 +55,16 @@ func ResolveWorkspaceName(flagName, prompt string, now time.Time) (string, error
 		}
 		return s, nil
 	}
-	ts := WorkspaceTimestamp(now)
-	if s := Slug(prompt); s != "" {
-		return s + "-" + ts, nil
+	if generatedID == "" {
+		return "", errors.New("generated workspace ID is empty")
 	}
-	return ts, nil
+	return generatedID, nil
 }
 
-func WorkspaceTimestamp(t time.Time) string {
-	return fmt.Sprintf("%s-%09d", t.Format("2006-01-02-150405"), t.Nanosecond())
+func NewWorkspaceID(r io.Reader) (string, error) {
+	var b [workspaceIDBytes]byte
+	if _, err := io.ReadFull(r, b[:]); err != nil {
+		return "", fmt.Errorf("generate workspace ID: %w", err)
+	}
+	return hex.EncodeToString(b[:]), nil
 }

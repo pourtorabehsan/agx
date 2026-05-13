@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -23,6 +24,23 @@ func TestEnsureWorkspace(t *testing.T) {
 	// Second call on the same name is a no-op, not an error.
 	if _, err := EnsureWorkspace(dir, "foo"); err != nil {
 		t.Errorf("re-ensure: %v", err)
+	}
+}
+
+func TestEnsureNewWorkspace(t *testing.T) {
+	dir := t.TempDir()
+	p, err := EnsureNewWorkspace(dir, "foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p != filepath.Join(dir, "foo") {
+		t.Errorf("wrong path: %q", p)
+	}
+	if _, err := os.Stat(filepath.Join(p, ".agx")); err != nil {
+		t.Errorf(".agx subdir missing: %v", err)
+	}
+	if _, err := EnsureNewWorkspace(dir, "foo"); !errors.Is(err, os.ErrExist) {
+		t.Fatalf("expected os.ErrExist, got %v", err)
 	}
 }
 
