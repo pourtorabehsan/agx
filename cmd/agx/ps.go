@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -30,6 +31,11 @@ func newPsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			sort.Slice(names, func(i, j int) bool {
+				ti := wsCreatedTime(paths.Workspace(names[i]))
+				tj := wsCreatedTime(paths.Workspace(names[j]))
+				return ti.After(tj)
+			})
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "NAME\tCREATED\tSTATUS\tAGENT\tMODEL\tPROMPT")
@@ -70,14 +76,21 @@ func runningWorkspaces() (map[string]bool, error) {
 	return m, nil
 }
 
-func wsCreated(wsPath string) string {
+func wsCreatedTime(wsPath string) time.Time {
 	if meta, err := ReadMeta(wsPath); err == nil && meta.Started != "" {
 		if t, err := time.Parse(time.RFC3339, meta.Started); err == nil {
-			return t.Local().Format("Jan 02 15:04")
+			return t
 		}
 	}
 	if info, err := os.Stat(wsPath); err == nil {
-		return info.ModTime().Local().Format("Jan 02 15:04")
+		return info.ModTime()
+	}
+	return time.Time{}
+}
+
+func wsCreated(wsPath string) string {
+	if t := wsCreatedTime(wsPath); !t.IsZero() {
+		return t.Local().Format("Jan 02 15:04")
 	}
 	return "unknown"
 }

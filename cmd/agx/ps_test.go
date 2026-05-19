@@ -31,8 +31,8 @@ func TestWsAgentAndModelFromMeta(t *testing.T) {
 func TestWsAgentAndModelDefaults(t *testing.T) {
 	wsPath := t.TempDir()
 
-	if got := wsAgent(wsPath); got != "codex" {
-		t.Fatalf("wsAgent() = %q, want %q", got, "codex")
+	if got := wsAgent(wsPath); got != "claude" {
+		t.Fatalf("wsAgent() = %q, want %q", got, "claude")
 	}
 	if got := wsModel(wsPath); got != "default" {
 		t.Fatalf("wsModel() = %q, want %q", got, "default")

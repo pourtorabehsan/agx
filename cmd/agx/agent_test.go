@@ -9,7 +9,7 @@ func TestParseAgent(t *testing.T) {
 		want    Agent
 		wantErr bool
 	}{
-		{name: "empty defaults to codex", input: "", want: AgentCodex},
+		{name: "empty defaults to claude", input: "", want: AgentClaude},
 		{name: "claude", input: "claude", want: AgentClaude},
 		{name: "codex", input: "codex", want: AgentCodex},
 		{name: "case insensitive", input: "Codex", want: AgentCodex},
@@ -38,7 +38,7 @@ func TestParseAgent(t *testing.T) {
 
 func TestAgentStringDefaultsEmpty(t *testing.T) {
 	var a Agent
-	if got := a.String(); got != "codex" {
-		t.Fatalf("got %q, want codex", got)
+	if got := a.String(); got != "claude" {
+		t.Fatalf("got %q, want claude", got)
 	}
 }

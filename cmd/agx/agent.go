@@ -13,7 +13,7 @@ const (
 )
 
 func DefaultAgent() Agent {
-	return AgentCodex
+	return AgentClaude
 }
 
 func ParseAgent(s string) (Agent, error) {

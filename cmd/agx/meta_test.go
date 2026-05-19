@@ -19,8 +19,8 @@ func TestReadMetaDefaultsAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Agent != AgentCodex {
-		t.Fatalf("got %q, want %q", got.Agent, AgentCodex)
+	if got.Agent != AgentClaude {
+		t.Fatalf("got %q, want %q", got.Agent, AgentClaude)
 	}
 }
 
@@ -62,7 +62,7 @@ func TestWriteMetaDefaultsAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Agent != AgentCodex {
-		t.Fatalf("got %q, want %q", got.Agent, AgentCodex)
+	if got.Agent != AgentClaude {
+		t.Fatalf("got %q, want %q", got.Agent, AgentClaude)
 	}
 }
