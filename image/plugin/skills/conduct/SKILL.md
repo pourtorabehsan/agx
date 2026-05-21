@@ -100,11 +100,13 @@ Choose the model for each sub-session based on cognitive demand. Phases that req
 
 `clone` always runs first, before any phase that touches code. It gets its repo list from CONTEXT.md frontmatter if capture ran, otherwise from the task prompt (look for a `Target repo:` line or any repo mentioned in the task description). It clones each repo to `/workspace/repos/<owner>/<name>/` and writes a manifest to `/workspace/.agx/repos.md`. Every subsequent brief must include the relevant path from that manifest — this is how sub-sessions find code without re-cloning.
 
-- **Small:** `clone` → `implement` → `push`
-- **Medium:** `clone` → `plan` → `test-spec` → `implement` → `review-spec` → `push`
-- **Large:** `clone` → `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-security` → `review-spec` → `push`
+- **Small:** `clone` → `implement`
+- **Medium:** `clone` → `plan` → `test-spec` → `implement` → `review-spec`
+- **Large:** `clone` → `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-security` → `review-spec`
 
-You may skip review phases if the turn budget is tight and confidence is high. Never skip `push` if implementation is complete — shipping is the point.
+`push` is not included by default. Branches are committed locally so the user can review before shipping. Add `push` to the phase list only when the task prompt explicitly requests it (e.g. "push" or "open a PR").
+
+You may skip review phases if the turn budget is tight and confidence is high.
 
 ## Step 4: Execute phases
 
@@ -148,7 +150,7 @@ echo "exit: $?"
 ## Step 5: Finish
 
 When all phases are complete:
-- Write a final entry to `/workspace/.agx/conduct.md`: turns used, phases completed, PR URL if pushed, unresolved open questions
+- Write a final entry to `/workspace/.agx/conduct.md`: turns used, phases completed, branch names and repo paths for review, PR URL if push ran, unresolved open questions
 - Invoke the `reflect` skill
 
 Do not post additional summaries or create other artifacts.
