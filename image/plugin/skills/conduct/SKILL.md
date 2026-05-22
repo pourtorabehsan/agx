@@ -86,6 +86,7 @@ Choose phases from the vocabulary below. You decide which to include and in what
 | `review-plan` | Independent critic — no knowledge of who wrote the plan |
 | `test-spec` | QA engineer writing expected behavior before any code exists |
 | `implement` | Engineer executing the plan precisely, no scope expansion |
+| `review-code` | Independent engineer — correctness bugs and logic errors only, no style feedback, no knowledge of the implementation brief |
 | `review-security` | Security reviewer — vulnerabilities only, no style feedback |
 | `review-spec` | Spec reviewer — does the output match the definition of done? |
 | `review-coverage` | Test coverage reviewer — are the right things tested? |
@@ -101,8 +102,8 @@ Choose the model for each sub-session based on cognitive demand. Phases that req
 `clone` always runs first, before any phase that touches code. It gets its repo list from CONTEXT.md frontmatter if capture ran, otherwise from the task prompt (look for a `Target repo:` line or any repo mentioned in the task description). It clones each repo to `/workspace/repos/<owner>/<name>/` and writes a manifest to `/workspace/.agx/repos.md`. Every subsequent brief must include the relevant path from that manifest — this is how sub-sessions find code without re-cloning.
 
 - **Small:** `clone` → `implement`
-- **Medium:** `clone` → `plan` → `test-spec` → `implement` → `review-spec`
-- **Large:** `clone` → `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-security` → `review-spec`
+- **Medium:** `clone` → `plan` → `test-spec` → `implement` → `review-code` → `review-spec`
+- **Large:** `clone` → `pre-mortem` → `plan` → `review-plan` → `test-spec` → `implement` → `review-code` → `review-security` → `review-spec`
 
 `push` is not included by default. Branches are committed locally so the user can review before shipping. Add `push` to the phase list only when the task prompt explicitly requests it (e.g. "push" or "open a PR").
 

@@ -17,11 +17,12 @@
     {
       "id": 2,
       "prompt": "add per-user and per-endpoint rate limiting to the API gateway. it should be configurable via env vars and degrade gracefully when redis is unavailable",
-      "expected_output": "Conductor classifies as medium, invokes capture, builds a plan → implement → review-spec → push phase list, routes based on output headers.",
+      "expected_output": "Conductor classifies as medium, invokes capture, builds a plan → implement → review-code → review-spec → push phase list, routes based on output headers.",
       "assertions": [
         "Classifies task as medium or large",
         "Invokes capture skill",
         "Includes a plan phase before implement",
+        "Includes review-code phase after implement",
         "Includes at least one review phase",
         "Review brief does not include the implementation prompt (blind review)",
         "Routes correctly based on output contract headers",
@@ -38,6 +39,7 @@
         "Invokes capture skill",
         "Includes pre-mortem phase",
         "Includes plan + review-plan before implement",
+        "Includes review-code phase after implement",
         "Identifies both repos in the phase briefs",
         "Uses more capable model for reasoning phases (noted in briefs or model flag)",
         "Tracks turn count in conduct.md",
