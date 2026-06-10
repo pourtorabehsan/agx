@@ -62,7 +62,7 @@ ENV HOME=/home/agx \
 # CLAUDE_CACHE_BUST forces a fresh upstream pull without invalidating the
 # earlier layers. Pass `--build-arg CLAUDE_CACHE_BUST=$(date +%s)` to
 # rebuild this layer (and the relocate layer below).
-ARG CLAUDE_CACHE_BUST=3
+ARG CLAUDE_CACHE_BUST=4
 USER agx
 WORKDIR /home/agx
 RUN echo "claude cache bust: ${CLAUDE_CACHE_BUST}" \
